@@ -1,0 +1,227 @@
+<!doctype html>
+<html>
+<head>
+  <title>Arogi Maximal Cover</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+  <link rel="stylesheet" href="leaflet/leaflet.css" />
+  <link rel="stylesheet" href="arogi.css" />
+  <script src="leaflet/leaflet.js"></script>
+  <script src="https://mapzen.com/tangram/0.6/tangram.min.js"></script>
+
+  <!-- // this loads a geojson of starting points.
+  // the variable is called defaultMarkers -->
+  <script src="startingdata.js"></script>
+
+
+  <style>
+
+  body {
+    padding: 0;
+    margin: 0;
+  }
+
+  #map {
+    height: 100%;
+    width: 100%;
+    padding:0px;
+    margin:0px;
+    position: absolute;
+  }
+
+  </style>
+</head>
+
+<body>
+  <div id="map"></div>
+
+  <div id="arogi-menu-main">
+    <div id="arogi-top-zone">Maximal Cover</div>
+    <div id="arogi-menu-upper">Parameters</div>
+
+    <div id="arogi-menu-middle">
+
+      <span class="parameterLabels">facilities</span><br />
+      <input type="range" id="pSlider" autocomplete="off" min="1" max="10" step="1" value="3" style="width: 75%;"
+      oninput="document.getElementById('myPValue').innerHTML = this.value;">
+      <span class="sliderValue" id="myPValue">3</span>
+
+      <p />
+
+      <span class="parameterLabels">distance (km)</span><br />
+      <input type="range" id="distanceSlider" autocomplete="off" min="0" max="3" step="0.2" value="1.6" style="width: 75%;"
+      oninput="document.getElementById('myDistanceValue').innerHTML = this.value;">
+      <span class="sliderValue" id="myDistanceValue">1.6</span>
+
+    </div>
+
+    <div id="arogi-menu-bottom">
+      <div id="arogi-sub-left">Demand Covered<br /><span id="solutionQuality"></span></div>
+    </div>
+  </div>
+
+
+
+  <script>
+
+  $(document).ready(function() {
+
+    function parameterAjaxTrigger(){
+      var useThisPValue = document.getElementById('myPValue').innerHTML;
+      var useThisDistanceValue = document.getElementById('myDistanceValue').innerHTML;
+
+      // update the GeoJSON with the latest parameter values
+      // initialize the rest
+      answeredGeoJson.properties.pValue = Number(useThisPValue);
+      answeredGeoJson.properties.distanceValue = Number(useThisDistanceValue);
+      answeredGeoJson.properties.efficacyPercentage = Number(-1);
+      answeredGeoJson.properties.demandTotal = Number(-1);
+      answeredGeoJson.properties.demandCovered = Number(-1);
+
+      var useTheseMarkers = JSON.stringify(answeredGeoJson);
+
+
+      // working animation...
+      // document.getElementById('solutionQuality').innerHTML = "<img src=\"ajax-loader.gif\" />";
+
+      $.ajax({
+        type: 'POST',
+        url: "mclp_interface.py",  // deliver the data to this script... it will answer back with a solution
+        data: {useTheseMarkers:useTheseMarkers},
+        success: function(answerText)
+        {
+          // overwrites and displays existing answeredGeoJson...
+          // with the response GeoJSON from the server
+          answeredGeoJson = JSON.parse(answerText);
+          document.getElementById('solutionQuality').innerHTML = ((answeredGeoJson.properties.efficacyPercentage)*100).toFixed(1) + "%";
+          // document.getElementById('solutionQuality').innerHTML = answerText;
+
+
+
+          myRadius = (answeredGeoJson.properties.distanceValue * 1000);
+
+
+          // erase existing circles, if they exist
+          anotherCounter = 0;
+
+          setTimeout(function(){
+            $(".myFade").animate({ fillOpacity: 0.1 }, 300, function() {
+            });
+          }, 100);
+
+
+          while (anotherCounter < simpleCount) {
+              if (circleArray[anotherCounter] != undefined) {
+                  map.removeLayer(circleArray[anotherCounter]);
+              anotherCounter++;
+            }
+          }
+
+          // make an array of new circles
+          simpleCount = 0;
+          $.each(answeredGeoJson.features, function(i, v) {
+              if (v.properties.facilityLocated == 1.0) {
+                  answerCoordinates = v.geometry.coordinates;
+                  circleArray[simpleCount] = new L.circle([answerCoordinates[1], answerCoordinates[0]], myRadius, {color: '#ffffff', fillColor: '#ffffff', fillOpacity: 0.8, weight:3, className:"myFade"});
+                  simpleCount++;
+              }
+
+          });
+
+          //alert("number of circles: " + simpleCount);
+
+          newSimpleCount = 0;
+          while (newSimpleCount < simpleCount) {
+            circleArray[newSimpleCount].addTo(map);
+            newSimpleCount++;
+          }
+
+
+
+          // clear the old map points and display the new ones
+          map.removeLayer(pointMarkers);
+          pointMarkers = L.geoJson(answeredGeoJson, {
+            pointToLayer: function (feature, latlng) {
+              return L.circleMarker(latlng, {radius: 1+(Math.log(feature.properties.pop+10)), fillColor: feature.properties.fillColor, color:"#000000",weight:0,opacity:1,fillOpacity: 0.9 });
+            }
+          });
+          pointMarkers.addTo(map);
+
+
+
+
+
+
+
+        },
+        error: function()
+        {
+          //// fail
+          document.getElementById('solutionQuality').innerHTML = answerText;
+          document.getElementById('solutionQuality').innerHTML = "( solution failed )";
+        }
+
+      });
+
+    } // end of parameterAjaxTrigger function
+
+    // test circle
+    var circleArray = new Array();
+    simpleCount = 0;
+
+    parameterAjaxTrigger();
+
+    $("#pSlider").on('change', function(){
+      // call the following function to send the parameters to the solution-makin' script
+      parameterAjaxTrigger();
+    });
+
+    $("#distanceSlider").on('change', function(){
+      // call the following function to send the parameters to the solution-makin' script
+      parameterAjaxTrigger();
+    });
+
+
+
+    // toggle the menus on and off
+    $('#arogi-top-zone').click(function(){
+      $('#arogi-menu-upper').toggle();
+      $('#arogi-menu-middle').toggle();
+      $('#arogi-menu-bottom').toggle();
+    });
+
+
+  });
+
+
+  // add basemap tiles from Mapzen's Tangram
+  var map = L.map('map', {zoomControl: false});
+  var layer = Tangram.leafletLayer({
+    scene: 'blueprint.yaml',
+    attribution: '<a href="arogi.com">Arogi</a> | &copy; <a href="http://osm.org">OpenSteetMap</a> | <a href="https://mapzen.com/tangram" target="_blank">Mapzen</a>'
+  });
+  layer.addTo(map);
+  map.attributionControl.setPrefix(""); // Leaflet prefix removed to afford an ordering change.
+
+  L.control.scale().setPosition('bottomright').addTo(map);
+  new L.Control.Zoom({ position: 'bottomright' }).addTo(map);
+
+  // takes the starting GeoJSON and gives it the variable name that
+  // is expected from the answering server -- not a big deal here.
+  // more of a thing up in the ajax call.
+
+  answeredGeoJson = defaultMarkers;
+
+  var pointMarkers = L.geoJson(answeredGeoJson, {
+    pointToLayer: function (feature, latlng) {
+      return L.circleMarker(latlng, {radius: 1+(Math.log(feature.properties.pop+10)), fillColor: feature.properties.fillColor, color:"#000000",weight:0,opacity:1,fillOpacity: 0.9 });
+    }
+  });
+  pointMarkers.addTo(map);
+
+  map.fitBounds(pointMarkers, {padding:[140,140]});
+
+  </script>
+
+</body>
+
+</html>
