@@ -6,7 +6,7 @@ import GISOps
 from ortools.linear_solver import pywraplp
 
 def main():
-  ReadJSONandSolve()
+    ReadJSONandSolve()
 
 def ReadJSONandSolve():
     [p,SD] = read_problem(receivedMarkerData)
@@ -30,21 +30,21 @@ def read_problem(file):
     # read data from string object
     ###print 'Reading JSON String Object!'
     try:
-      js = json.loads(file) # Convert the string into a JSON Object
+        js = json.loads(file) # Convert the string into a JSON Object
     except IOError:
-      print "unable to read file"
+        print "unable to read file"
 
     numFeatures = len(js['features'])
 
     # if the geoJSON includes p and SD values, use these rather than any input arguments
     try:
-      p = js['properties']['pValue']
+        p = js['properties']['pValue']
     except IOError:
-      print "geoJSON has no pValue"
+        print "geoJSON has no pValue"
     try:
-      SD = js['properties']['distanceValue']*1000
+        SD = js['properties']['distanceValue']*1000
     except IOError:
-      print "geoJSON has no distanceValue"
+        print "geoJSON has no distanceValue"
 
     xyPointArray = [[None for k in range(2)] for j in range(numFeatures)]
     xyPointArray = GISOps.GetCONUSeqDprojCoords(js) # Get the Distance Coordinates in CONUS EqD Projection
@@ -52,9 +52,22 @@ def read_problem(file):
     facilityIDs = []
     demandIDs = []
     demandTotal = 0
+    
+    # Temporary Array will hold the rowID of each feature in the JSON object
+    temp = []
+    rowID = 0
+    
+    # typeFD = Field Codes Represent:
+    #  1 = demand only
+    #  2 = potential facility only
+    #  3 = both demand and potential facility
     for element in js['features']:
-        # Both Facility/Demand
-        if element['properties']['typeFD']==3:
+        
+        # to create a dictionary of pointID and row number
+        temp.append((element['properties']['pointID'],rowID))
+        rowID += 1
+        
+        if element['properties']['typeFD']==3: # Both Facility/Demand
             facilityIDs.append(element['properties']['pointID'])
             demandIDs.append(element['properties']['pointID'])
             demandTotal += element['properties']['pop']
@@ -75,10 +88,7 @@ def read_problem(file):
 
     numSites = len(facilityIDs)
     numDemands = len(demandIDs)
-    # typeFD = Field Codes Represent:
-    #  1 = demand only
-    #  2 = potential facility only
-    #  3 = both demand and potential facility
+
     siteArray = [[None for k in range(4)] for j in range(numSites)]
     demandArray = [[None for k in range(4)] for j in range(numDemands)]
 
@@ -100,6 +110,14 @@ def read_problem(file):
         j += 1
       k += 1
     numForced = sum(zip(*siteArray)[3])
+    # check if valid for the given p
+    try:
+      if numForced > p:
+        raise DataError('numForcedGreaterThanP')
+    except DataError:
+      print 'number of forced facilities is greater than p'
+      raise
+    
     ###print 'Finished Reading the Data!'
     return [p, SD]
 
@@ -125,12 +143,10 @@ def RunMCLPexampleCppStyleAPI(optimization_problem_type, p, SD):
 
     # Create a global version of:
     # Facility Site Variable X
-    global X
     X = [-1] * numSites # Note, these will need to be updated if we start to consider demands/facility sites seperately
 
     # Coverage Variable Y  - NOTE!!: Matt used the Minimization form where:
     # Y = 1 if it is NOT COVERED by a facility located within SD of demand Yi
-    global Y
     Y = [-1] * numDemands # Note, these will need to be updated if we start to consider demands/facility sites seperately
 
     # instantiate distance matrix
@@ -162,7 +178,7 @@ def RunMCLPexampleCppStyleAPI(optimization_problem_type, p, SD):
     # generate the objective function and constraints
     k = 0
     for j in range(numSites):
-        # initialize the X and Y variables as Binary Integer (Boolean) variables
+        # initialize the X variables as Binary Integer (Boolean) variables
         name = "X,%d" % facilityIDs[j]
         X[j] = solver.BoolVar(name)
         c2.SetCoefficient(X[j],1)
@@ -173,6 +189,7 @@ def RunMCLPexampleCppStyleAPI(optimization_problem_type, p, SD):
 
     for i in range(numDemands):
         name = "Y,%d" % demandIDs[i]
+        # initialize the Y variables as Binary Integer (Boolean) variables
         Y[i] = solver.BoolVar(name)
         # Set the Objective Coefficients for the population * Demand Variable (Yi)
         objective.SetCoefficient(Y[i],demandArray[i][3])
@@ -180,7 +197,7 @@ def RunMCLPexampleCppStyleAPI(optimization_problem_type, p, SD):
         c1[i] = solver.Constraint(1, solver.infinity())
         c1[i].SetCoefficient(Y[i],1)
         for j in range(numSites):
-            if N[i][j] == 1: # and i != j:
+            if N[i][j] == 1:
                 c1[i].SetCoefficient(X[j],1)
 
     #printModel = True
@@ -188,10 +205,10 @@ def RunMCLPexampleCppStyleAPI(optimization_problem_type, p, SD):
         model = solver.ExportModelAsLpFormat(False)
         print(model)
 
-    SolveAndPrint(solver, [X,Y], p, SD)
+    SolveAndPrint(solver, X, Y, p, SD)
     return 1
 
-def SolveAndPrint(solver, variable_list, p, SD):
+def SolveAndPrint(solver, X, Y, p, SD):
     """Solve the problem and print the solution."""
     ###print 'Number of variables = %d' % solver.NumVariables()
     ###print 'Number of constraints = %d' % solver.NumConstraints()
@@ -211,7 +228,7 @@ def SolveAndPrint(solver, variable_list, p, SD):
     ###print 'Optimal objective value = %f' % solver.Objective().Value()
 
     # print the selected sites
-    count = -1
+    ### count = -1
     ### for j in facilityIDs:
     ###   count += 1
     ###   if (X[count].SolutionValue() == 1.0):
@@ -227,29 +244,24 @@ def generateGEOJSON(X, Y, p, SD):
     demandCovered = 0
     covered = -1
     located = -1
-    for k in range(0, numFeatures):
-        js['features'][k]['properties']['facilityLocated'] = 0
-        #js['features'][j]['properties']['facilityLocated'] = X[j].SolutionValue()
-
-        # NOTE: it is 1 - Y[j] because Y[j] is 1 if it is NOT covered
-        js['features'][k]['properties']['covered'] = 0
-        #js['features'][j]['properties']['covered'] = 1 - Y[j].SolutionValue()
-        #print js['features'][k]['properties']['covered']
 
     count = 0
     for j in facilityIDs:
       located = X[count].SolutionValue()
-      js['features'][j-1]['properties']['facilityLocated'] = located
+      jsRow = jsonRowDictionary[j]
+      js['features'][jsRow]['properties']['facilityLocated'] = located
       if located == 1:
-        js['features'][j-1]['properties']['fillColor'] = '#DD2727'
+        js['features'][jsRow]['properties']['fillColor'] = '#DD2727'
       count += 1
 
     count = 0
     for i in demandIDs:
+      jsRow = jsonRowDictionary[i]
+      # NOTE: it is 1 - Y[j] because Y[j] is 1 if it is NOT covered  
       covered = 1 - Y[count].SolutionValue()
-      js['features'][i-1]['properties']['covered'] = covered
+      js['features'][jsRow]['properties']['covered'] = covered
       if covered == 1:
-        demandCovered += js['features'][i-1]['properties']['pop']
+        demandCovered += js['features'][jsRow]['properties']['pop']
       count += 1
 
     js['properties']['demandCovered'] = demandCovered
