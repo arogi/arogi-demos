@@ -3,6 +3,8 @@
 import cgi, cgitb
 import json
 import GISOps
+import numpy as np
+from scipy.spatial.distance import cdist
 from ortools.linear_solver import pywraplp
 
 def main():
@@ -23,19 +25,19 @@ def read_problem(file):
     global demandArray
     global js
     global demandTotal
-
+    
     p = -1
     SD = -1
-
+    
     # read data from string object
     ###print 'Reading JSON String Object!'
     try:
       js = json.loads(file) # Convert the string into a JSON Object
     except IOError:
       print "unable to read file"
-
+    
     numFeatures = len(js['features'])
-
+    
     # if the geoJSON includes p and SD values, use these rather than any input arguments
     try:
       p = js['properties']['pValue']
@@ -45,10 +47,10 @@ def read_problem(file):
       SD = js['properties']['distanceValue']*1000
     except IOError:
       print "geoJSON has no distanceValue"
-
+    
     xyPointArray = [[None for k in range(2)] for j in range(numFeatures)]
     xyPointArray = GISOps.GetCONUSeqDprojCoords(js) # Get the Distance Coordinates in CONUS EqD Projection
-
+    
     facilityIDs = []
     demandIDs = []
     demandTotal = 0
@@ -77,10 +79,10 @@ def read_problem(file):
     
     numSites = len(facilityIDs)
     numDemands = len(demandIDs)
-
+    
     siteArray = [[None for k in range(3)] for j in range(numSites)]
     demandArray = [[None for k in range(3)] for j in range(numDemands)]
-
+    
     # assemble pertinent data for the model into multidimensional arrays
     i = 0
     j = 0
@@ -132,32 +134,30 @@ def RunMCLPexampleCppStyleAPI(optimization_problem_type, p, SD):
     # Coverage Variable Y  - NOTE!!: Matt used the Minimization form where:
     # Y = 1 if it is NOT COVERED by a facility located within SD of demand Yi
     Y = [-1] * numDemands # Note, these will need to be updated if we start to consider demands/facility sites seperately
-
-    # instantiate neighborhood (coverage) matrix
-    N = [[0 for i in range(numSites)] for j in range(numDemands)]
     
     SDsquared = SD*SD
+    
+    A = [demandArray[i][0:2] for i in range(numDemands)]    
+    B = [siteArray[j][0:2] for j in range(numSites)]
+    
     # Determine neighborhood of sites within SD of each other
-    for j in range(numSites):
-        for i in range(numDemands):
-            if ((siteArray[j][0]-demandArray[i][0])**2 + (siteArray[j][1]-demandArray[i][1])**2) <= SDsquared:
-                N[i][j] = 1
-
-
+    Nrows,Ncols = np.nonzero(((cdist(A, B,'sqeuclidean') <= SDsquared).astype(bool)))
+    Nsize = len(Nrows)
+    
     # DECLARE CONSTRAINTS:
     # declare demand coverage constraints (binary integer: 1 if UNCOVERED, 0 if COVERED)
     c1 = [None]*numDemands
-
+    
     # Explicitly declare and initialize the p-facility constraint
     c2 = solver.Constraint(p,p) # equality constraint equal to p
-
+    
     # declare the forced facility location constraints
     c3 = [None]*numForced
-
+    
     # declare the objective
     objective = solver.Objective()
     objective.SetMinimization()
-
+    
     # generate the objective function and constraints
     k = 0
     for j in range(numSites):
@@ -169,7 +169,7 @@ def RunMCLPexampleCppStyleAPI(optimization_problem_type, p, SD):
           c3[k] = solver.Constraint(1,1)
           c3[k].SetCoefficient(X[j],1)
           k += 1
-
+    
     for i in range(numDemands):
         name = "Y,%d" % demandIDs[i]
         Y[i] = solver.BoolVar(name)
@@ -178,15 +178,10 @@ def RunMCLPexampleCppStyleAPI(optimization_problem_type, p, SD):
         # Covering constraints
         c1[i] = solver.Constraint(1, solver.infinity())
         c1[i].SetCoefficient(Y[i],1)
-        for j in range(numSites):
-            if N[i][j] == 1: # and i != j:
-                c1[i].SetCoefficient(X[j],1)
-
-    #printModel = True
-    if printModel:
-        model = solver.ExportModelAsLpFormat(False)
-        print(model)
-
+    
+    for k in range(Nsize):
+        c1[Nrows[k]].SetCoefficient(X[Ncols[k]],1)
+    
     SolveAndPrint(solver, X, Y, p, SD)
     return 1
 
@@ -264,7 +259,6 @@ receivedMarkerData = form.getvalue('useTheseMarkers')
 #receivedGeoJson = json.loads(receivedMarkerData)
 
 # the magic happens here...
-printModel = False
 main()
 
 # prepare for output... the GeoJSON should be returned as a string
