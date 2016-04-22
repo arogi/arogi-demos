@@ -10,7 +10,7 @@
 
   <!-- // this loads a geojson of starting points.
   // the variable is called defaultMarkers -->
-  <script src="data/mclp_data_1000.js"></script>
+  <script src="data/mclp_data_500.js"></script>
 
 
   <style>
@@ -85,7 +85,7 @@
 
       $.ajax({
         type: 'POST',
-        url: "mclp_interface.py",  // deliver the data to this script... it will answer back with a solution
+        url: "interface/mclp_interface.py",  // deliver the data to this script... it will answer back with a solution
         data: {useTheseMarkers:useTheseMarkers},
         success: function(answerText)
         {
