@@ -1,5 +1,3 @@
-# INCOMPLETE
-
 import cgi, cgitb
 import json
 import GISOps
