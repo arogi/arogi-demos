@@ -15,6 +15,28 @@
 	/* min-height: 400px; */
 }
 
+#arogi-control-zone {
+	width: 100%;
+	height: 11px;
+	background: #2C3539;
+	color: white;
+	text-align: right;
+	font-weight: lighter;
+	line-height: 5px; /* meant to create vertical alignment */
+	clear:both;
+	-webkit-user-select: none;  /* Chrome all / Safari all */
+	-moz-user-select: none;     /* Firefox all */
+	-ms-user-select: none;      /* IE 10+ */
+	user-select: none;          /* Likely future */
+}
+
+#three-dots {
+	width: 20px;
+	padding: 0 10px 0 0;
+}
+
+
+
 #arogi-top-zone {
 	width: 100%;
 	height: 50px;
