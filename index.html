@@ -49,10 +49,12 @@
 
       <p />
 
-      <span class="parameterLabels">distance (km)</span><br />
-      <input type="range" id="distanceSlider" autocomplete="off" min="0" max="20" step="0.2" value="10" style="width: 75%;"
-      oninput="document.getElementById('myDistanceValue').innerHTML = this.value;">
-      <span class="sliderValue" id="myDistanceValue">10</span>
+      <div id="distance-slider-area">
+        <span class="parameterLabels">distance (km)</span><br />
+        <input type="range" id="distanceSlider" autocomplete="off" min="0" max="20" step="0.2" value="10" style="width: 75%;"
+        oninput="document.getElementById('myDistanceValue').innerHTML = this.value;">
+        <span class="sliderValue" id="myDistanceValue">10</span>
+      </div>
 
     </div>
 
@@ -67,7 +69,6 @@
 
   $(document).ready(function() {
 
-    // test circle
     circleArray = new Array();
     redDots = new Array();
     simpleCount = 0;
@@ -75,32 +76,51 @@
 
     mclpAjaxTrigger();
 
-    $("#pSlider").on('change', function(){
-      // call the following function to send the parameters to the solution-makin' script
-      mclpAjaxTrigger();
-    });
 
-    $("#distanceSlider").on('change', function(){
-      // call the following function to send the parameters to the solution-makin' script
-      mclpAjaxTrigger();
-    });
 
-    // toggle the menus on and off
-    $('#arogi-top-zone').click(function(){
-      $('#arogi-menu-upper').toggle();
-      $('#arogi-menu-middle').toggle();
-      $('#arogi-menu-bottom').toggle();
-    });
 
-    // toggle the menus on and off
+    // toggle the Max Cover and p-Median UIs
     $('#three-dots').click(function(){
-      alert('click!');
+      var problemState;
+      if (document.getElementById('arogi-top-zone').innerHTML == "p-Median") {
+        // now set to Maximal Cover
+        document.getElementById('arogi-top-zone').innerHTML = "Maximal Cover";
+        problemState = 0;
+        document.querySelector("#arogi-menu-middle").style.height = "120px";
+        $("#distance-slider-area").show();
+        document.getElementById('arogi-sub-left').innerHTML = "Demand Covered";
+
+
+      } else {
+        // now set to p-Median
+        document.getElementById('arogi-top-zone').innerHTML = "p-Median";
+        problemState = 1;
+        $("#distance-slider-area").hide();
+        document.querySelector("#arogi-menu-middle").style.height = "60px";
+        document.getElementById('arogi-sub-left').innerHTML = "Median Distance";
+
+      };
     });
-
-
 
   });
 
+  $("#pSlider").on('change', function(){
+    // call the following function to send the parameters to the solution-makin' script
+    mclpAjaxTrigger();
+  });
+
+  $("#distanceSlider").on('change', function(){
+    // call the following function to send the parameters to the solution-makin' script
+    mclpAjaxTrigger();
+  });
+
+  // toggle the menus on and off
+  $('#arogi-top-zone').click(function(){
+    $('#arogi-menu-upper').toggle();
+    $('#arogi-menu-middle').toggle();
+    $('#arogi-menu-bottom').toggle();
+  });
+  
 
   // add basemap tiles from Mapzen's Tangram
   var map = L.map('map', {zoomControl: false});
