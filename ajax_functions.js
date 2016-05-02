@@ -101,6 +101,8 @@ function mclpAjaxTrigger(){
         newSimpleCount++;
       };
 
+
+      // enable the ability to drag red dots around, remove old circle marker, and draw a new one
       newSimpleCount = 0;
       while (newSimpleCount < simpleCount) {
         redDots[newSimpleCount].on('dragend', function(e) {
