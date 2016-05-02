@@ -16,6 +16,12 @@ function mclpAjaxTrigger(){
 
   var useTheseMarkers = JSON.stringify(answeredGeoJson);
 
+  var redIcon = L.icon({
+      iconUrl: '/images/reddot.png',
+      iconSize:     [10, 10], // size of the icon
+      iconAnchor:   [5, 5], // point of the icon which will correspond to marker's location
+  });
+
 
   // working animation...
   // document.getElementById('solutionQuality').innerHTML = "<img src=\"ajax-loader.gif\" />";
@@ -56,11 +62,15 @@ function mclpAjaxTrigger(){
           if (v.properties.facilityLocated == 1.0) {
               answerCoordinates = v.geometry.coordinates;
               circleArray[simpleCount] = new L.circle([answerCoordinates[1], answerCoordinates[0]], myRadius, {color: '#ffffff', fillColor: '#ffffff', fillOpacity: 0.9, weight:3, className:"myFade"});
-              redDots[simpleCount] = new L.circle([answerCoordinates[1], answerCoordinates[0]], 100, {color: '#ff0000', fillColor: '#ff0000', fillOpacity: 1, weight:3});
+              redDots[simpleCount] = new L.marker([answerCoordinates[1], answerCoordinates[0]], {draggable:'true', icon:redIcon});
+              redDots[simpleCount].id = simpleCount;
               simpleCount++;
           }
 
       });
+
+
+
       //alert("number of circles: " + simpleCount);
       // add the coverage circles to the map
       newSimpleCount = 0;
@@ -89,8 +99,29 @@ function mclpAjaxTrigger(){
       while (newSimpleCount < simpleCount) {
         redDots[newSimpleCount].addTo(map);
         newSimpleCount++;
-      }
+      };
 
+      newSimpleCount = 0;
+      while (newSimpleCount < simpleCount) {
+        redDots[newSimpleCount].on('dragend', function(e) {
+          var myMarker = e.target;
+          var myPosition = myMarker.getLatLng();
+          // these are the same thing now ----> alert(myMarker.id + ", " + redDots[myMarker.id].id);
+          map.removeLayer(circleArray[myMarker.id]);
+
+          setTimeout(function(){
+            $(".myFade2").animate({ fillOpacity: 0.2 }, 300, function() {
+            });
+          }, 100);
+
+          circleArray[myMarker.id] = new L.circle([myPosition.lat, myPosition.lng], myRadius, {color: '#ffffff', fillColor: '#ffffff', fillOpacity: 0.9, weight:3, className:"myFade2"});
+          circleArray[myMarker.id].addTo(map);
+
+          // error checking... posts lat/long in solution efficacy area
+          // document.getElementById('solutionQuality').innerHTML = myPosition.lng.toFixed(2) + ", " + myPosition.lat.toFixed(2);
+        });
+        newSimpleCount++;
+      };
 
 
 
