@@ -1,7 +1,5 @@
 function mclpAjaxTrigger(){
 
-
-
   var pointMarkers2;
   var useThisPValue = document.getElementById('myPValue').innerHTML;
   var useThisDistanceValue = document.getElementById('myDistanceValue').innerHTML;
@@ -23,9 +21,6 @@ function mclpAjaxTrigger(){
   });
 
 
-  // working animation...
-  // document.getElementById('solutionQuality').innerHTML = "<img src=\"ajax-loader.gif\" />";
-
   $.ajax({
     type: 'POST',
     url: "interface/mclp_interface.py",  // deliver the data to this script... it will answer back with a solution
@@ -37,7 +32,6 @@ function mclpAjaxTrigger(){
       answeredGeoJson = JSON.parse(answerText);
       document.getElementById('solutionQuality').innerHTML = ((answeredGeoJson.properties.efficacyPercentage)*100).toFixed(1) + "%";
       // document.getElementById('solutionQuality').innerHTML = answerText;
-
 
       // erase existing coverage circles, if they exist
       anotherCounter = 0;
