@@ -125,10 +125,34 @@ function mclpAjaxTrigger(){
     error: function()
     {
       //// fail
-      document.getElementById('solutionQuality').innerHTML = answerText;
+      // document.getElementById('solutionQuality').innerHTML = answerText;
       document.getElementById('solutionQuality').innerHTML = "( solution failed )";
     }
 
   });
 
 } // end of parameterAjaxTrigger function
+
+
+// send data over to pmedian_interface.py
+function pmedianAjaxTrigger(){
+
+  var useThisValueForP = document.getElementById('myPValue').innerHTML;
+  var useTheseMarkers = JSON.stringify(answeredGeoJson);
+
+  $.ajax({
+    type: 'POST',
+    url: "interface/pmedian_interface.py",  // deliver the data to this script... it will answer back with a solution
+    data: {useTheseMarkers:useTheseMarkers},
+    success: function(answerText) {
+      //// you send over the GeoJSON (useTheseMakers) and get a response (answerText)
+      // All the cartographic magic happens here... (not coded)
+      // for now, here is a placeholder to show the answer
+      document.getElementById('solutionQuality').innerHTML = answerText;
+    },
+    error: function(){
+      //// fail
+      document.getElementById('solutionQuality').innerHTML = "( solution failed )";
+    }
+  });
+}
