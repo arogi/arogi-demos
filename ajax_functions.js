@@ -148,11 +148,35 @@ function pmedianAjaxTrigger(){
       //// you send over the GeoJSON (useTheseMakers) and get a response (answerText)
       // All the cartographic magic happens here... (not coded)
       // for now, here is a placeholder to show the answer
+
+      // Order of operations: remove all the cartography on the map, display the new stuff
+      oneMoreCounter = 0;
+      while (oneMoreCounter < simpleCount) {
+          // presumably if circleArray exists, redDots does too... so...
+          if (circleArray[OneMoreCounter] != undefined) {
+              map.removeLayer(circleArray[oneMoreCounter]);
+              map.removeLayer(redDots[oneMoreCounter]);
+          oneMoreCounter++;
+        }
+      }
+
+
+
+
       document.getElementById('solutionQuality').innerHTML = answerText;
     },
     error: function(){
       //// fail
-      document.getElementById('solutionQuality').innerHTML = "( solution failed )";
+
+      // clear all layers except the map background itself
+      map.eachLayer(function (layer2) {
+          if (layer2 != backgroundLayer) {
+            map.removeLayer(layer2);
+          };
+      });
+
+
+      document.getElementById('solutionQuality').innerHTML = simpleCount;
     }
   });
 }
