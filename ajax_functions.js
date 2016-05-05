@@ -150,16 +150,12 @@ function pmedianAjaxTrigger(){
       // for now, here is a placeholder to show the answer
 
       // Order of operations: remove all the cartography on the map, display the new stuff
-      oneMoreCounter = 0;
-      while (oneMoreCounter < simpleCount) {
-          // presumably if circleArray exists, redDots does too... so...
-          if (circleArray[OneMoreCounter] != undefined) {
-              map.removeLayer(circleArray[oneMoreCounter]);
-              map.removeLayer(redDots[oneMoreCounter]);
-          oneMoreCounter++;
-        }
-      }
-
+      // clear all layers except the map background itself
+      map.eachLayer(function (layer2) {
+          if (layer2 != backgroundLayer) {
+            map.removeLayer(layer2);
+          };
+      });
 
 
 
@@ -176,7 +172,7 @@ function pmedianAjaxTrigger(){
       });
 
 
-      document.getElementById('solutionQuality').innerHTML = simpleCount;
+      document.getElementById('solutionQuality').innerHTML = "(solution failed)";
     }
   });
 }
