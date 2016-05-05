@@ -20,6 +20,14 @@ function mclpAjaxTrigger(){
       iconAnchor:   [5, 5], // point of the icon which will correspond to marker's location
   });
 
+  var yellowIcon = L.icon({
+      iconUrl: '/images/ffffb2x16.png',
+      iconSize:     [2, 2], // size of the icon
+      iconAnchor:   [1, 1], // point of the icon which will correspond to marker's location
+  });
+
+
+
 
   $.ajax({
     type: 'POST',
@@ -85,6 +93,7 @@ function mclpAjaxTrigger(){
         pointToLayer: function (feature, latlng) {
           // return L.circleMarker(latlng, {radius: 1+(Math.log(feature.properties.pop+10)), fillColor: feature.properties.fillColor, color:"#000000",weight:0,opacity:1,fillOpacity: 0.9 });
           return L.circleMarker(latlng, {radius: 1.5, fillColor: "#ffff99", color:"#ffff99",weight:0,opacity:1,fillOpacity: 1 });
+          // return L.marker(latlng, {icon:yellowIcon});
         }
       });
       pointMarkers.addTo(map);
@@ -138,16 +147,13 @@ function mclpAjaxTrigger(){
 function pmedianAjaxTrigger(){
 
   var useThisValueForP = document.getElementById('myPValue').innerHTML;
-  var useTheseMarkers = JSON.stringify(answeredGeoJson);
+  var useTheseMarkers2 = JSON.stringify(answeredGeoJson);
 
   $.ajax({
     type: 'POST',
-    url: "interface/pmedian_interface.py",  // deliver the data to this script... it will answer back with a solution
-    data: {useTheseMarkers:useTheseMarkers},
+    url: "interface/mirror.py",  // deliver the data to this script... it will answer back with a solution
+    data: {useTheseMarkers:useTheseMarkers2},
     success: function(answerText) {
-      //// you send over the GeoJSON (useTheseMakers) and get a response (answerText)
-      // All the cartographic magic happens here... (not coded)
-      // for now, here is a placeholder to show the answer
 
       // Order of operations: remove all the cartography on the map, display the new stuff
       // clear all layers except the map background itself
@@ -158,8 +164,44 @@ function pmedianAjaxTrigger(){
       });
 
 
+      // go through the answeredGeoJson and find unique values of assignedTo...
+      // these are the hubs. there will be exactly p of them. store the values
+
+      // go through the answeredGeoJson and assign each feature to one of p colors
+
+      // does the file even have the key/attribute 'assignedTo' in it?
+      var propertyStatus = 0;
+      $.each(answeredGeoJson.features, function(i, v) {
+          //if (v.properties.hasOwnProperty('assignedTo')) {
+          if (v.hasOwnProperty('assignedTo')) {
+            propertyStatus = 1;
+          } else {
+            propertyStatus = 2;
+          }
+      };
+      //
+      // if (propertyStatus == 1) {
+      //   alert('assignedTo exists');
+      // };
+      //
+      // if (propertyStatus == 2) {
+      //   alert('assigntedTo is not in document');
+      // };
+
+
+      implicitAddress = 0;
+      $.each(answeredGeoJson.features, function(i, v) {
+          if (v.properties.assignedTo < 1.0) {
+              if (implicitAddress == 30){
+                alert('yay!');
+              }
+          }
+          implicitAddress++;
+      });
+      alert(implicitAddress);
 
       document.getElementById('solutionQuality').innerHTML = answerText;
+
     },
     error: function(){
       //// fail
