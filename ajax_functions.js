@@ -170,15 +170,15 @@ function pmedianAjaxTrigger(){
       // go through the answeredGeoJson and assign each feature to one of p colors
 
       // does the file even have the key/attribute 'assignedTo' in it?
-      var propertyStatus = 0;
-      $.each(answeredGeoJson.features, function(i, v) {
-          //if (v.properties.hasOwnProperty('assignedTo')) {
-          if (v.hasOwnProperty('assignedTo')) {
-            propertyStatus = 1;
-          } else {
-            propertyStatus = 2;
-          }
-      };
+      // var propertyStatus = 0;
+      // $.each(answeredGeoJson.features, function(i, v) {
+      //     if (v.properties.assignedTo < 1)) {
+      //     //if (v.hasOwnProperty('assignedTo')) {
+      //       propertyStatus = 1;
+      //     } else {
+      //       propertyStatus = 2;
+      //     }
+      // };
       //
       // if (propertyStatus == 1) {
       //   alert('assignedTo exists');
