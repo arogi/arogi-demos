@@ -18,7 +18,7 @@
   function interfaceTest(){
     $.ajax({
       type: 'POST',
-      url: "interface/mclp_interface.py",  // this is the interface to test.
+      url: "interface/pmedian_interface.py",  // this is the interface to test.
       data: {useTheseMarkers:useThisInputData},
       success: function(answerText) {
         document.getElementById('solution').innerHTML = answerText;
