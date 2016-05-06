@@ -8,7 +8,7 @@ from scipy.spatial.distance import cdist
 from ortools.linear_solver import pywraplp
 
 def main():
-  ReadJSONandSolve()
+    ReadJSONandSolve()
 
 def ReadJSONandSolve():
     [p,SD] = read_problem(receivedMarkerData)
