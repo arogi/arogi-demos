@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+<head>
+  <title>Arogi Maximal Cover</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+
+  <!-- This is the data to use for the test -->
+  <script src="data/mclp_data_100.js"></script>
+</head>
+
+<body>
+  <button type="button" onclick="interfaceTest()">Run InterfaceTest</button>
+  <p />
+  <span id="solution">Response</span>
+
+  <script>
+  useThisInputData = JSON.stringify(defaultMarkers);
+  function interfaceTest(){
+    $.ajax({
+      type: 'POST',
+      url: "interface/mclp_interface.py",  // this is the interface to test.
+      data: {useTheseMarkers:useThisInputData},
+      success: function(answerText) {
+        document.getElementById('solution').innerHTML = answerText;
+      },
+      error: function(){
+        document.getElementById('solution').innerHTML = "Failure";
+      }
+    });
+
+  }
+  </script>
+
+
+</body>
+
+</html>
