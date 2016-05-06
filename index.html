@@ -10,7 +10,7 @@
   <script src="ajax_functions.js"></script>
   <!-- // this loads a geojson of starting points.
   // the variable is called defaultMarkers -->
-  <script src="data/mclp_data_500.js"></script>
+  <script src="data/pmedian_data_100.js"></script>
 
 
   <style>
@@ -32,6 +32,23 @@
 </head>
 
 <body>
+
+
+  <!-- select and load file button
+  // note: need to put this some place more dignified
+  // note: also this solution may require: - allow-file-access-from-files flag for chrome in order to access local json files
+  // note: word is, that it works fine with web-based files. -->
+  <!-- <span class="parameterLabels">data file:</span>
+  <button id="id">Choose file</button><input id="yourinputname" type="file" name="yourinputname" style="display: none;" />
+
+  <script>
+  $('#id').on('click', function() {
+      $('#yourinputname').trigger('click');
+  });
+  </script> -->
+  <!-- // end of select and load file button -->
+
+
   <div id="map"></div>
 
   <div id="arogi-menu-main">
@@ -62,8 +79,6 @@
       <div id="arogi-sub-left">Demand Covered<br /><span id="solutionQuality"></span></div>
     </div>
   </div>
-
-
 
   <script>
 
@@ -99,6 +114,7 @@
         $("#distance-slider-area").hide();
         document.querySelector("#arogi-menu-middle").style.height = "60px";
         document.getElementById('arogi-sub-left').innerHTML = "Median Distance<br /><span id=\"solutionQuality\"></span>";
+        pmedianAjaxTrigger();
 
       };
     });
@@ -131,11 +147,11 @@
 
   // add basemap tiles from Mapzen's Tangram
   var map = L.map('map', {zoomControl: false});
-  var layer = Tangram.leafletLayer({
+  var backgroundLayer = Tangram.leafletLayer({
     scene: 'grayprint.yaml',
     attribution: '<a href="arogi.com">Arogi</a> | &copy; <a href="http://osm.org">OpenSteetMap</a> | <a href="https://mapzen.com/tangram" target="_blank">Mapzen</a>'
   });
-  layer.addTo(map);
+  backgroundLayer.addTo(map);
   map.attributionControl.setPrefix(""); // Leaflet prefix removed to afford an ordering change.
 
   L.control.scale().setPosition('bottomright').addTo(map);

@@ -1,7 +1,5 @@
 function mclpAjaxTrigger(){
 
-
-
   var pointMarkers2;
   var useThisPValue = document.getElementById('myPValue').innerHTML;
   var useThisDistanceValue = document.getElementById('myDistanceValue').innerHTML;
@@ -22,9 +20,14 @@ function mclpAjaxTrigger(){
       iconAnchor:   [5, 5], // point of the icon which will correspond to marker's location
   });
 
+  var yellowIcon = L.icon({
+      iconUrl: '/images/ffffb2x16.png',
+      iconSize:     [2, 2], // size of the icon
+      iconAnchor:   [1, 1], // point of the icon which will correspond to marker's location
+  });
 
-  // working animation...
-  // document.getElementById('solutionQuality').innerHTML = "<img src=\"ajax-loader.gif\" />";
+
+
 
   $.ajax({
     type: 'POST',
@@ -37,7 +40,6 @@ function mclpAjaxTrigger(){
       answeredGeoJson = JSON.parse(answerText);
       document.getElementById('solutionQuality').innerHTML = ((answeredGeoJson.properties.efficacyPercentage)*100).toFixed(1) + "%";
       // document.getElementById('solutionQuality').innerHTML = answerText;
-
 
       // erase existing coverage circles, if they exist
       anotherCounter = 0;
@@ -91,6 +93,7 @@ function mclpAjaxTrigger(){
         pointToLayer: function (feature, latlng) {
           // return L.circleMarker(latlng, {radius: 1+(Math.log(feature.properties.pop+10)), fillColor: feature.properties.fillColor, color:"#000000",weight:0,opacity:1,fillOpacity: 0.9 });
           return L.circleMarker(latlng, {radius: 1.5, fillColor: "#ffff99", color:"#ffff99",weight:0,opacity:1,fillOpacity: 1 });
+          // return L.marker(latlng, {icon:yellowIcon});
         }
       });
       pointMarkers.addTo(map);
@@ -131,10 +134,87 @@ function mclpAjaxTrigger(){
     error: function()
     {
       //// fail
-      document.getElementById('solutionQuality').innerHTML = answerText;
+      // document.getElementById('solutionQuality').innerHTML = answerText;
       document.getElementById('solutionQuality').innerHTML = "( solution failed )";
     }
 
   });
 
 } // end of parameterAjaxTrigger function
+
+
+// send data over to pmedian_interface.py
+function pmedianAjaxTrigger(){
+
+  var useThisValueForP = document.getElementById('myPValue').innerHTML;
+  var useTheseMarkers2 = JSON.stringify(answeredGeoJson);
+
+  $.ajax({
+    type: 'POST',
+    url: "interface/mirror.py",  // deliver the data to this script... it will answer back with a solution
+    data: {useTheseMarkers:useTheseMarkers2},
+    success: function(answerText) {
+
+      // Order of operations: remove all the cartography on the map, display the new stuff
+      // clear all layers except the map background itself
+      map.eachLayer(function (layer2) {
+          if (layer2 != backgroundLayer) {
+            map.removeLayer(layer2);
+          };
+      });
+
+
+      // go through the answeredGeoJson and find unique values of assignedTo...
+      // these are the hubs. there will be exactly p of them. store the values
+
+      // go through the answeredGeoJson and assign each feature to one of p colors
+
+      // does the file even have the key/attribute 'assignedTo' in it?
+      // var propertyStatus = 0;
+      // $.each(answeredGeoJson.features, function(i, v) {
+      //     if (v.properties.assignedTo < 1)) {
+      //     //if (v.hasOwnProperty('assignedTo')) {
+      //       propertyStatus = 1;
+      //     } else {
+      //       propertyStatus = 2;
+      //     }
+      // };
+      //
+      // if (propertyStatus == 1) {
+      //   alert('assignedTo exists');
+      // };
+      //
+      // if (propertyStatus == 2) {
+      //   alert('assigntedTo is not in document');
+      // };
+
+
+      implicitAddress = 0;
+      $.each(answeredGeoJson.features, function(i, v) {
+          if (v.properties.assignedTo < 1.0) {
+              if (implicitAddress == 30){
+                alert('yay!');
+              }
+          }
+          implicitAddress++;
+      });
+      alert(implicitAddress);
+
+      document.getElementById('solutionQuality').innerHTML = answerText;
+
+    },
+    error: function(){
+      //// fail
+
+      // clear all layers except the map background itself
+      map.eachLayer(function (layer2) {
+          if (layer2 != backgroundLayer) {
+            map.removeLayer(layer2);
+          };
+      });
+
+
+      document.getElementById('solutionQuality').innerHTML = "(solution failed)";
+    }
+  });
+}
