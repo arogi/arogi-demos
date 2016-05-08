@@ -7,40 +7,12 @@ import numpy as np
 from scipy.spatial.distance import cdist
 from ortools.linear_solver import pywraplp
 
-
 def main():
-    ReadJSONandSolve()
+    readJSONandSolve()
 
-
-def readJSONandSolve(jsonStrObj,p):
+def readJSONandSolve():
     p = read_problem(receivedMarkerData)
-    RunALLMCLPexampleCppStyleAPI(p)
-
-
-def RunAllPMedianExampleCppStyleAPI(p):
-    if hasattr(pywraplp.Solver, 'CBC_MIXED_INTEGER_PROGRAMMING'):
-        RunPMedianExampleCppStyleAPI(pywraplp.Solver.CBC_MIXED_INTEGER_PROGRAMMING, p)
-        
-        
-def RunPMedianExampleCppStyleAPI(optimization_problem_type, p):
-    """solve a standard formulation p-median problem"""
-    solver = pywraplp.Solver('RunIntegerExampleCppStyleAPI',
-                           optimization_problem_type)
-
-    # 1 if demand i is served by facility j
-    X = [[None for j in range(numFacilities)] for i in range(numDemands)]
-    # 1 if facility at site j is located
-    Y = [None]*numFacilities
-
-    PreComputeDistances()
-
-    BuildModel(solver, X, Y, p)
-    SolveModel(solver, X, Y, p)
-
-    generateGEOJSON(X, Y, p)
-    displaySolution(solver, Y, p)
-    return 1
-
+    RunAllPMedianExampleCppStyleAPI(p)
 
 def read_problem(file):
     global numFeatures
@@ -52,9 +24,9 @@ def read_problem(file):
     global demandIDs
     global demandPop
     global js
-  
+
     try:
-        js = json.loads(file)
+      js = json.loads(file) # Convert the string into a JSON Object
     except IOError:
       print "unable to read file"
 
@@ -69,7 +41,7 @@ def read_problem(file):
     facilityIDs = []
     demandIDs = []
     forcedFacilities = []
-  
+
     # rowID holds the index of each feature in the JSON object
     rowID = 0
 
@@ -88,13 +60,13 @@ def read_problem(file):
         if element['properties']['forcedLocation'] == 1:
             forcedFacilities.append(rowID)
         rowID += 1
-  
+
     numFacilities = len(facilityIDs)
     numDemands = len(demandIDs)
     numForced = len(forcedFacilities)
 
     demandPop = [js['features'][i]['properties']['pop'] for i in demandIDs]
-  
+
     # check if valid for the given p
     try:
         if numForced > p:
@@ -102,13 +74,48 @@ def read_problem(file):
     except DataError:
         print 'number of forced facilities is greater than p'
         raise
-
-    print 'Finished Reading the Data!'
     return p
+
+def RunAllPMedianExampleCppStyleAPI(p):
+    if hasattr(pywraplp.Solver, 'CBC_MIXED_INTEGER_PROGRAMMING'):
+        RunPMedianExampleCppStyleAPI(pywraplp.Solver.CBC_MIXED_INTEGER_PROGRAMMING, p)
+
+
+def RunPMedianExampleCppStyleAPI(optimization_problem_type, p):
+    """solve a standard formulation p-median problem"""
+    solver = pywraplp.Solver('RunIntegerExampleCppStyleAPI',
+                           optimization_problem_type)
+
+    # 1 if demand i is served by facility j
+    X = [[None for j in range(numFacilities)] for i in range(numDemands)]
+    # 1 if facility at site j is located
+    Y = [None]*numFacilities
+
+    PreComputeDistances()
+
+    BuildModel(solver, X, Y, p)
+    SolveModel(solver, X, Y, p)
     
+    generateGEOJSON(X, Y, p)
+    return 1
+
+def PreComputeDistances():
+
+    #declare a couple variables
+    global dSort
+    global d
+
+    # Convert Coordinates from Lat/Long to CONUS EqD Projection
+    xyPointArray = GISOps.GetCONUSeqDprojCoords(js)
+
+    A = [xyPointArray[i][:] for i in demandIDs]
+    B = [xyPointArray[j][:] for j in facilityIDs]
+
+    d = cdist(A, B,'euclidean')
+    return 1
 
 def BuildModel(solver, X, Y, p):
-  
+
     infinity = solver.infinity()
 
     # DECLARE CONSTRAINTS
@@ -136,7 +143,7 @@ def BuildModel(solver, X, Y, p):
         c1[i] = solver.Constraint(1, 1)
 
         for j in range(numFacilities):
-  
+
             # initialize the X assignment variables and add them to the objective function
             X[i][j] = solver.BoolVar('X_%d,%d' % (i,j))
             objective.SetCoefficient(X[i][j], demandPop[i]*d[i,j])
@@ -147,27 +154,7 @@ def BuildModel(solver, X, Y, p):
             # Yj - Xij >= 0 <--- canonical form of the assignment constraint
             c2[i*numFacilities+j] = solver.Constraint(0, infinity) # c2 rhs
             c2[i*numFacilities+j].SetCoefficient(X[i][j], -1)
-            c2[i*numFacilities+j].SetCoefficient(Y[j], 1)  
-
-    print 'Number of variables = %d' % solver.NumVariables()
-    print 'Number of constraints = %d' % solver.NumConstraints()
-    print
-    return 1
-
-
-def PreComputeDistances():
-    
-    #declare a couple variables
-    global dSort
-    global d
-    
-    # Convert Coordinates from Lat/Long to CONUS EqD Projection
-    xyPointArray = GISOps.GetCONUSeqDprojCoords(js)
-    
-    A = [xyPointArray[i][:] for i in demandIDs]
-    B = [xyPointArray[j][:] for j in facilityIDs]
-    
-    d = cdist(A, B,'euclidean')
+            c2[i*numFacilities+j].SetCoefficient(Y[j], 1)
     return 1
 
 
@@ -185,17 +172,16 @@ def SolveModel(solver, X, Y, p):
 
 
 def generateGEOJSON(X, Y, p):
-  
+
     for j in range(numFacilities):
         located = Y[j].SolutionValue()
-        js['features'][facilityIDs[j]]['properties']['facilityLocated'] = located 
+        js['features'][facilityIDs[j]]['properties']['facilityLocated'] = located
 
     for i in range(numDemands):
         for j in range(numFacilities):
             if (X[i][j].SolutionValue() == True):
                 js['features'][demandIDs[i]]['properties']['assignedTo'] = facilityIDs[j]
                 break
-    writeToGJSFile(js, p)
     return 1
 
 
