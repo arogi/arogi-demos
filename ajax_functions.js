@@ -15,13 +15,13 @@ function mclpAjaxTrigger(){
   var useTheseMarkers = JSON.stringify(answeredGeoJson);
 
   var redIcon = L.icon({
-      iconUrl: '/images/reddot.png',
+      iconUrl: '/images/ff0000.png',
       iconSize:     [10, 10], // size of the icon
       iconAnchor:   [5, 5], // point of the icon which will correspond to marker's location
   });
 
   var yellowIcon = L.icon({
-      iconUrl: '/images/ffffb2x16.png',
+      iconUrl: '/images/ffffb2.png',
       iconSize:     [2, 2], // size of the icon
       iconAnchor:   [1, 1], // point of the icon which will correspond to marker's location
   });
@@ -160,6 +160,51 @@ function mclpAjaxTrigger(){
 // send data over to pmedian_interface.py
 function pmedianAjaxTrigger(){
 
+  var fc4e2aIcon = L.icon({
+      iconUrl: '/images/fc4e2a.png',
+      iconSize:     [10, 10], // size of the icon
+      iconAnchor:   [5, 5], // point of the icon which will correspond to marker's location
+  });
+
+  var fd8d3cIcon = L.icon({
+      iconUrl: '/images/fd8d3c.png',
+      iconSize:     [10, 10], // size of the icon
+      iconAnchor:   [5, 5], // point of the icon which will correspond to marker's location
+  });
+
+  var feb24cIcon = L.icon({
+      iconUrl: '/images/feb24c.png',
+      iconSize:     [10, 10], // size of the icon
+      iconAnchor:   [5, 5], // point of the icon which will correspond to marker's location
+  });
+
+  var fed976Icon = L.icon({
+      iconUrl: '/images/fed976.png',
+      iconSize:     [10, 10], // size of the icon
+      iconAnchor:   [5, 5], // point of the icon which will correspond to marker's location
+  });
+
+  var ff0000Icon = L.icon({
+      iconUrl: '/images/ff0000.png',
+      iconSize:     [10, 10], // size of the icon
+      iconAnchor:   [5, 5], // point of the icon which will correspond to marker's location
+  });
+
+  var ffffb2Icon = L.icon({
+      iconUrl: '/images/ffffb2.png',
+      iconSize:     [10, 10], // size of the icon
+      iconAnchor:   [5, 5], // point of the icon which will correspond to marker's location
+  });
+
+  var ffffffIcon = L.icon({
+      iconUrl: '/images/ffffff.png',
+      iconSize:     [10, 10], // size of the icon
+      iconAnchor:   [5, 5], // point of the icon which will correspond to marker's location
+  });
+
+
+  // pmedianMarkers = [];
+
   var useThisValueForP = document.getElementById('myPValue').innerHTML;
   answeredGeoJson.properties.pValue = Number(useThisValueForP);
   var useTheseMarkers2 = JSON.stringify(answeredGeoJson);
@@ -178,25 +223,7 @@ function pmedianAjaxTrigger(){
           };
       });
 
-      // (DONE) go through the answeredGeoJson and find unique values of assignedTo...
-      // these are the hubs. there will be exactly p of them. store the values
-      // go through the answeredGeoJson and assign each feature to one of p colors
-
-
       newAnswer = JSON.parse(answerText);
-
-
-      // draw the background source/demand dots
-      pmedianMarkers = L.geoJson(newAnswer, {
-        pointToLayer: function (feature, latlng) {
-          // return L.circleMarker(latlng, {radius: 1+(Math.log(feature.properties.pop+10)), fillColor: feature.properties.fillColor, color:"#000000",weight:0,opacity:1,fillOpacity: 0.9 });
-          return L.circleMarker(latlng, {radius: 1.5, fillColor: "#ffff99", color:"#ffff99",weight:0,opacity:1,fillOpacity: 1 });
-          // return L.marker(latlng, {icon:yellowIcon});
-        }
-      });
-      pmedianMarkers.addTo(map);
-
-
 
       var inputArray = [];
       var uniquesArray = [];
@@ -206,30 +233,16 @@ function pmedianAjaxTrigger(){
           inputArray.push(implicitAddress);
       });
 
-      // an array of the unique assignment addresses
+      // an array of the unique assignment addresses. these are the hub addresses
       uniquesArray = NoDuplicates(inputArray)
-      // alert(uniquesArray.toString());
-
-
-      //draw the hubs
-      var feb24cIcon = L.icon({
-          iconUrl: '/images/feb24c.png',
-          iconSize:     [10, 10], // size of the icon
-          iconAnchor:   [5, 5], // point of the icon which will correspond to marker's location
-      });
-
-      var ffffb2Icon = L.icon({
-          iconUrl: '/images/ffffb2.png',
-          iconSize:     [10, 10], // size of the icon
-          iconAnchor:   [5, 5], // point of the icon which will correspond to marker's location
-      });
 
 
       simpleCount2 = 0;
+      littlecounter = 0;
       $.each(newAnswer.features, function(i, v) {
 
           // if the feature is one of the hubs (its address is in uniquesArray), the make a special marker
-          littlecounter = 0;
+          // littlecounter = 0;
           /// test is the address simpleCount2 in the uniquesArray, if so, set a true flag
           // the indexof method was acting wonky, so i did this less-efficient, full-fledged check instead
           isThisAddressAHub = false;
@@ -239,15 +252,42 @@ function pmedianAjaxTrigger(){
                 break;
               }
           }
-          // so, if the address is a hub, draw a red circle on it
-          if (isThisAddressAHub) {
-          // if (uniquesArray[3] == simpleCount2) {
-              answerCoordinates2 = v.geometry.coordinates;
-              pmedianHubs[littlecounter] = new L.marker([answerCoordinates2[1], answerCoordinates2[0]], {draggable:'false', icon:ffffb2Icon});
-              pmedianHubs[littlecounter].id = simpleCount2;
 
-              // go through the geojson and draw some spokes?
-              SpiderDiagrammer(simpleCount2, answerCoordinates2, newAnswer);
+          if (isThisAddressAHub) {
+
+              answerCoordinates2 = v.geometry.coordinates;
+
+              // send SpiderDiagrammer: the address of the hub, a color switcher variable, hubCoordinates, json of all the points
+              // the spider diagram will draw both the spokes and the end points
+
+              SpiderDiagrammer(simpleCount2, littlecounter, answerCoordinates2, newAnswer);
+
+              // you can use this to change the spoke colors if you wish
+              switch(littlecounter%6) {
+                  case 0:
+                      hubColor2 = ffffffIcon;
+                      break;
+                  case 1:
+                      hubColor2 = ffffb2Icon;
+                      break;
+                  case 2:
+                      hubColor2 = fc4e2aIcon;
+                      break;
+                  case 3:
+                      hubColor2 = feb24cIcon;
+                      break;
+                  case 4:
+                      hubColor2 = fd8d3cIcon;
+                      break;
+                  case 5:
+                      hubColor2 = fed976Icon;
+                      break;
+                  default:
+                      mhubColor2 = ffffb2Icon;
+              };
+
+              pmedianHubs[littlecounter] = new L.marker([answerCoordinates2[1], answerCoordinates2[0]], {draggable:'false', icon:hubColor2});
+              pmedianHubs[littlecounter].id = simpleCount2;
 
               pmedianHubs[littlecounter].addTo(map);
               littlecounter++;
@@ -255,12 +295,6 @@ function pmedianAjaxTrigger(){
           simpleCount2++;
           isThisAddressAHub = false;
       });
-
-
-
-
-
-
 
       // document.getElementById('solutionQuality').innerHTML = answerText;
 
@@ -291,10 +325,34 @@ function NoDuplicates(inputArray) {
     return uniqueArray;
 }
 
-function SpiderDiagrammer(hubAddress, hubCoordinates, jsonOfPoints){
+function SpiderDiagrammer(hubAddress, colorIndicator, hubCoordinates, jsonOfPoints){
     var spokeCounter = 0;
     var mySpokesArray = new Array();
     var mySpoke;
+
+
+    switch(colorIndicator%6) {
+        case 0:
+            mySpokeColor = "#ffffff";
+            break;
+        case 1:
+            mySpokeColor = "#ffffb2";
+            break;
+        case 2:
+            mySpokeColor = "#fc4e2a";
+            break;
+        case 3:
+            mySpokeColor = "#feb24c";
+            break;
+        case 4:
+            mySpokeColor = "#fd8d3c";
+            break;
+        case 5:
+            mySpokeColor = "#fed976";
+            break;
+        default:
+            mySpokeColor = "#ffffb2";
+    };
 
     spokeCounter = 0;
     $.each(newAnswer.features, function(i, v) {
@@ -303,8 +361,14 @@ function SpiderDiagrammer(hubAddress, hubCoordinates, jsonOfPoints){
           spokeEnds = v.geometry.coordinates;
           mySpoke = [[hubCoordinates[1], hubCoordinates[0]],[spokeEnds[1],spokeEnds[0]]];
           mySpokesArray[spokeCounter] = L.polyline(mySpoke);
-          mySpokesArray[spokeCounter].setStyle({color: '#fff', weight: 1, opacity: 0.8});
+
+          //mySpokesArray[spokeCounter].setStyle({color: "#ffffff", weight: 1, opacity: 0.5});
+          mySpokesArray[spokeCounter].setStyle({color: mySpokeColor, weight: 1, opacity: 0.5});
           mySpokesArray[spokeCounter].addTo(map);
+
+
+          pmedianMarkers = new L.circleMarker([spokeEnds[1],spokeEnds[0]], {radius: 2, fillColor: mySpokeColor, color:"#ffffff",weight:0,opacity:1,fillOpacity: 1 });
+          pmedianMarkers.addTo(map);
           spokeCounter++;
       }
     });
