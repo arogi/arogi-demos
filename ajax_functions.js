@@ -42,14 +42,28 @@ function mclpAjaxTrigger(){
       // document.getElementById('solutionQuality').innerHTML = answerText;
 
       // erase existing coverage circles, if they exist
-      anotherCounter = 0;
-      while (anotherCounter < simpleCount) {
-          if (circleArray[anotherCounter] != undefined) {
-              map.removeLayer(circleArray[anotherCounter]);
-              map.removeLayer(redDots[anotherCounter]);
-          anotherCounter++;
-        }
-      }
+      // the following commented lines are an earlier version... testing to see if the following active lines
+      // are a better implementation.
+
+      // anotherCounter = 0;
+      // while (anotherCounter < simpleCount) {
+      //     if (circleArray[anotherCounter] != undefined) {
+      //         map.removeLayer(circleArray[anotherCounter]);
+      //         map.removeLayer(redDots[anotherCounter]);
+      //     anotherCounter++;
+      //   }
+      // }
+
+      // Order of operations: remove all the cartography on the map, display the new stuff
+      // clear all layers except the map background itself
+      map.eachLayer(function (layer3) {
+          if (layer3 != backgroundLayer) {
+            map.removeLayer(layer3);
+          };
+      });
+
+
+
 
       // draw the new coverage circles...
       // and make them a little flashy
@@ -164,44 +178,91 @@ function pmedianAjaxTrigger(){
           };
       });
 
-
-      // go through the answeredGeoJson and find unique values of assignedTo...
+      // (DONE) go through the answeredGeoJson and find unique values of assignedTo...
       // these are the hubs. there will be exactly p of them. store the values
-
       // go through the answeredGeoJson and assign each feature to one of p colors
 
-      // does the file even have the key/attribute 'assignedTo' in it?
-      // var propertyStatus = 0;
-      // $.each(answeredGeoJson.features, function(i, v) {
-      //     if (v.properties.assignedTo < 1)) {
-      //     //if (v.hasOwnProperty('assignedTo')) {
-      //       propertyStatus = 1;
-      //     } else {
-      //       propertyStatus = 2;
-      //     }
-      // };
-      //
-      // if (propertyStatus == 1) {
-      //   alert('assignedTo exists');
-      // };
-      //
-      // if (propertyStatus == 2) {
-      //   alert('assigntedTo is not in document');
-      // };
+
+      newAnswer = JSON.parse(answerText);
 
 
-      implicitAddress = 0;
-      $.each(answeredGeoJson.features, function(i, v) {
-          if (v.properties.assignedTo < 1.0) {
-              if (implicitAddress == 30){
-                alert('yay!');
+      // draw the background source/demand dots
+      pmedianMarkers = L.geoJson(newAnswer, {
+        pointToLayer: function (feature, latlng) {
+          // return L.circleMarker(latlng, {radius: 1+(Math.log(feature.properties.pop+10)), fillColor: feature.properties.fillColor, color:"#000000",weight:0,opacity:1,fillOpacity: 0.9 });
+          return L.circleMarker(latlng, {radius: 1.5, fillColor: "#ffff99", color:"#ffff99",weight:0,opacity:1,fillOpacity: 1 });
+          // return L.marker(latlng, {icon:yellowIcon});
+        }
+      });
+      pmedianMarkers.addTo(map);
+
+
+
+      var inputArray = [];
+      var uniquesArray = [];
+      implicitAddress = -1;
+      $.each(newAnswer.features, function(i, v) {
+          implicitAddress = v.properties.assignedTo;
+          inputArray.push(implicitAddress);
+      });
+
+      // an array of the unique assignment addresses
+      uniquesArray = NoDuplicates(inputArray)
+      // alert(uniquesArray.toString());
+
+
+      //draw the hubs
+      var feb24cIcon = L.icon({
+          iconUrl: '/images/feb24c.png',
+          iconSize:     [10, 10], // size of the icon
+          iconAnchor:   [5, 5], // point of the icon which will correspond to marker's location
+      });
+
+      var ffffb2Icon = L.icon({
+          iconUrl: '/images/ffffb2.png',
+          iconSize:     [10, 10], // size of the icon
+          iconAnchor:   [5, 5], // point of the icon which will correspond to marker's location
+      });
+
+
+      simpleCount2 = 0;
+      $.each(newAnswer.features, function(i, v) {
+
+          // if the feature is one of the hubs (its address is in uniquesArray), the make a special marker
+          littlecounter = 0;
+          /// test is the address simpleCount2 in the uniquesArray, if so, set a true flag
+          // the indexof method was acting wonky, so i did this less-efficient, full-fledged check instead
+          isThisAddressAHub = false;
+          for (var qq = 0; qq < uniquesArray.length; qq++) {
+              if (uniquesArray[qq] == simpleCount2) {
+                isThisAddressAHub = true;
+                break;
               }
           }
-          implicitAddress++;
-      });
-      alert(implicitAddress);
+          // so, if the address is a hub, draw a red circle on it
+          if (isThisAddressAHub) {
+          // if (uniquesArray[3] == simpleCount2) {
+              answerCoordinates2 = v.geometry.coordinates;
+              pmedianHubs[littlecounter] = new L.marker([answerCoordinates2[1], answerCoordinates2[0]], {draggable:'false', icon:ffffb2Icon});
+              pmedianHubs[littlecounter].id = simpleCount2;
 
-      document.getElementById('solutionQuality').innerHTML = answerText;
+              // go through the geojson and draw some spokes?
+              SpiderDiagrammer(simpleCount2, answerCoordinates2, newAnswer);
+
+              pmedianHubs[littlecounter].addTo(map);
+              littlecounter++;
+          }
+          simpleCount2++;
+          isThisAddressAHub = false;
+      });
+
+
+
+
+
+
+
+      // document.getElementById('solutionQuality').innerHTML = answerText;
 
     },
     error: function(){
@@ -218,4 +279,35 @@ function pmedianAjaxTrigger(){
       document.getElementById('solutionQuality').innerHTML = "(solution failed)";
     }
   });
+}
+
+function NoDuplicates(inputArray) {
+    var temp = {};
+    for (var i = 0; i < inputArray.length; i++)
+        temp[inputArray[i]] = true;
+    var uniqueArray = [];
+    for (var k in temp)
+        uniqueArray.push(k);
+    return uniqueArray;
+}
+
+function SpiderDiagrammer(hubAddress, hubCoordinates, jsonOfPoints){
+    var spokeCounter = 0;
+    var mySpokesArray = new Array();
+    var mySpoke;
+
+    spokeCounter = 0;
+    $.each(newAnswer.features, function(i, v) {
+      // if the feature is assignted to the hubAddress, then draw the lines
+      if (v.properties.assignedTo == hubAddress) {
+          spokeEnds = v.geometry.coordinates;
+          mySpoke = [[hubCoordinates[1], hubCoordinates[0]],[spokeEnds[1],spokeEnds[0]]];
+          mySpokesArray[spokeCounter] = L.polyline(mySpoke);
+          mySpokesArray[spokeCounter].setStyle({color: '#fff', weight: 1, opacity: 0.8});
+          mySpokesArray[spokeCounter].addTo(map);
+          spokeCounter++;
+      }
+    });
+
+
 }

@@ -86,8 +86,10 @@
 
     circleArray = new Array();
     redDots = new Array();
+    pmedianHubs = new Array();
     simpleCount = 0;
     var pointMarkers;
+    var pmedianMarkers;
     problemState = 0;
 
     mclpAjaxTrigger();
@@ -105,7 +107,7 @@
         $("#distance-slider-area").show();
         document.getElementById('arogi-sub-left').innerHTML = "Demand Covered<br /><span id=\"solutionQuality\"></span>";
         mclpAjaxTrigger();
-        
+
       } else {
         // now set to p-Median
         document.getElementById('arogi-top-zone').innerHTML = "p-Median";
