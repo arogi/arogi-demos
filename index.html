@@ -10,7 +10,7 @@
   <script src="ajax_functions.js"></script>
   <!-- // this loads a geojson of starting points.
   // the variable is called defaultMarkers -->
-  <script src="data/pmedian_data_100.js"></script>
+  <script src="data/mclp_data_100.js"></script>
 
 
   <style>
@@ -86,8 +86,10 @@
 
     circleArray = new Array();
     redDots = new Array();
+    pmedianHubs = new Array();
     simpleCount = 0;
     var pointMarkers;
+    var pmedianMarkers;
     problemState = 0;
 
     mclpAjaxTrigger();
@@ -105,7 +107,6 @@
         $("#distance-slider-area").show();
         document.getElementById('arogi-sub-left').innerHTML = "Demand Covered<br /><span id=\"solutionQuality\"></span>";
         mclpAjaxTrigger();
-
 
       } else {
         // now set to p-Median
@@ -127,7 +128,7 @@
           mclpAjaxTrigger();
           break;
         case 1: // p-median
-          // run the p-median stuff
+          pmedianAjaxTrigger();
           break;
     };
 

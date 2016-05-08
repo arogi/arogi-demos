@@ -15,13 +15,13 @@ function mclpAjaxTrigger(){
   var useTheseMarkers = JSON.stringify(answeredGeoJson);
 
   var redIcon = L.icon({
-      iconUrl: '/images/reddot.png',
+      iconUrl: '/images/ff0000.png',
       iconSize:     [10, 10], // size of the icon
       iconAnchor:   [5, 5], // point of the icon which will correspond to marker's location
   });
 
   var yellowIcon = L.icon({
-      iconUrl: '/images/ffffb2x16.png',
+      iconUrl: '/images/ffffb2.png',
       iconSize:     [2, 2], // size of the icon
       iconAnchor:   [1, 1], // point of the icon which will correspond to marker's location
   });
@@ -42,14 +42,28 @@ function mclpAjaxTrigger(){
       // document.getElementById('solutionQuality').innerHTML = answerText;
 
       // erase existing coverage circles, if they exist
-      anotherCounter = 0;
-      while (anotherCounter < simpleCount) {
-          if (circleArray[anotherCounter] != undefined) {
-              map.removeLayer(circleArray[anotherCounter]);
-              map.removeLayer(redDots[anotherCounter]);
-          anotherCounter++;
-        }
-      }
+      // the following commented lines are an earlier version... testing to see if the following active lines
+      // are a better implementation.
+
+      // anotherCounter = 0;
+      // while (anotherCounter < simpleCount) {
+      //     if (circleArray[anotherCounter] != undefined) {
+      //         map.removeLayer(circleArray[anotherCounter]);
+      //         map.removeLayer(redDots[anotherCounter]);
+      //     anotherCounter++;
+      //   }
+      // }
+
+      // Order of operations: remove all the cartography on the map, display the new stuff
+      // clear all layers except the map background itself
+      map.eachLayer(function (layer3) {
+          if (layer3 != backgroundLayer) {
+            map.removeLayer(layer3);
+          };
+      });
+
+
+
 
       // draw the new coverage circles...
       // and make them a little flashy
@@ -146,12 +160,58 @@ function mclpAjaxTrigger(){
 // send data over to pmedian_interface.py
 function pmedianAjaxTrigger(){
 
+  var fc4e2aIcon = L.icon({
+      iconUrl: '/images/fc4e2a.png',
+      iconSize:     [10, 10], // size of the icon
+      iconAnchor:   [5, 5], // point of the icon which will correspond to marker's location
+  });
+
+  var fd8d3cIcon = L.icon({
+      iconUrl: '/images/fd8d3c.png',
+      iconSize:     [10, 10], // size of the icon
+      iconAnchor:   [5, 5], // point of the icon which will correspond to marker's location
+  });
+
+  var feb24cIcon = L.icon({
+      iconUrl: '/images/feb24c.png',
+      iconSize:     [10, 10], // size of the icon
+      iconAnchor:   [5, 5], // point of the icon which will correspond to marker's location
+  });
+
+  var fed976Icon = L.icon({
+      iconUrl: '/images/fed976.png',
+      iconSize:     [10, 10], // size of the icon
+      iconAnchor:   [5, 5], // point of the icon which will correspond to marker's location
+  });
+
+  var ff0000Icon = L.icon({
+      iconUrl: '/images/ff0000.png',
+      iconSize:     [10, 10], // size of the icon
+      iconAnchor:   [5, 5], // point of the icon which will correspond to marker's location
+  });
+
+  var ffffb2Icon = L.icon({
+      iconUrl: '/images/ffffb2.png',
+      iconSize:     [10, 10], // size of the icon
+      iconAnchor:   [5, 5], // point of the icon which will correspond to marker's location
+  });
+
+  var ffffffIcon = L.icon({
+      iconUrl: '/images/ffffff.png',
+      iconSize:     [10, 10], // size of the icon
+      iconAnchor:   [5, 5], // point of the icon which will correspond to marker's location
+  });
+
+
+  // pmedianMarkers = [];
+
   var useThisValueForP = document.getElementById('myPValue').innerHTML;
+  answeredGeoJson.properties.pValue = Number(useThisValueForP);
   var useTheseMarkers2 = JSON.stringify(answeredGeoJson);
 
   $.ajax({
     type: 'POST',
-    url: "interface/mirror.py",  // deliver the data to this script... it will answer back with a solution
+    url: "interface/pmedian_interface.py",  // deliver the data to this script... it will answer back with a solution
     data: {useTheseMarkers:useTheseMarkers2},
     success: function(answerText) {
 
@@ -163,44 +223,80 @@ function pmedianAjaxTrigger(){
           };
       });
 
+      newAnswer = JSON.parse(answerText);
 
-      // go through the answeredGeoJson and find unique values of assignedTo...
-      // these are the hubs. there will be exactly p of them. store the values
+      var inputArray = [];
+      var uniquesArray = [];
+      implicitAddress = -1;
+      $.each(newAnswer.features, function(i, v) {
+          implicitAddress = v.properties.assignedTo;
+          inputArray.push(implicitAddress);
+      });
 
-      // go through the answeredGeoJson and assign each feature to one of p colors
-
-      // does the file even have the key/attribute 'assignedTo' in it?
-      // var propertyStatus = 0;
-      // $.each(answeredGeoJson.features, function(i, v) {
-      //     if (v.properties.assignedTo < 1)) {
-      //     //if (v.hasOwnProperty('assignedTo')) {
-      //       propertyStatus = 1;
-      //     } else {
-      //       propertyStatus = 2;
-      //     }
-      // };
-      //
-      // if (propertyStatus == 1) {
-      //   alert('assignedTo exists');
-      // };
-      //
-      // if (propertyStatus == 2) {
-      //   alert('assigntedTo is not in document');
-      // };
+      // an array of the unique assignment addresses. these are the hub addresses
+      uniquesArray = NoDuplicates(inputArray)
 
 
-      implicitAddress = 0;
-      $.each(answeredGeoJson.features, function(i, v) {
-          if (v.properties.assignedTo < 1.0) {
-              if (implicitAddress == 30){
-                alert('yay!');
+      simpleCount2 = 0;
+      littlecounter = 0;
+      $.each(newAnswer.features, function(i, v) {
+
+          // if the feature is one of the hubs (its address is in uniquesArray), the make a special marker
+          // littlecounter = 0;
+          /// test is the address simpleCount2 in the uniquesArray, if so, set a true flag
+          // the indexof method was acting wonky, so i did this less-efficient, full-fledged check instead
+          isThisAddressAHub = false;
+          for (var qq = 0; qq < uniquesArray.length; qq++) {
+              if (uniquesArray[qq] == simpleCount2) {
+                isThisAddressAHub = true;
+                break;
               }
           }
-          implicitAddress++;
-      });
-      alert(implicitAddress);
 
-      document.getElementById('solutionQuality').innerHTML = answerText;
+          if (isThisAddressAHub) {
+
+              answerCoordinates2 = v.geometry.coordinates;
+
+              // send SpiderDiagrammer: the address of the hub, a color switcher variable, hubCoordinates, json of all the points
+              // the spider diagram will draw both the spokes and the end points
+
+              SpiderDiagrammer(simpleCount2, littlecounter, answerCoordinates2, newAnswer);
+
+              // you can use this to change the spoke colors if you wish
+              switch(littlecounter%6) {
+                  case 0:
+                      hubColor2 = ffffffIcon;
+                      break;
+                  case 1:
+                      hubColor2 = ffffb2Icon;
+                      break;
+                  case 2:
+                      hubColor2 = fc4e2aIcon;
+                      break;
+                  case 3:
+                      hubColor2 = feb24cIcon;
+                      break;
+                  case 4:
+                      hubColor2 = fd8d3cIcon;
+                      break;
+                  case 5:
+                      hubColor2 = fed976Icon;
+                      break;
+                  default:
+                      mhubColor2 = ffffb2Icon;
+              };
+
+              pmedianHubs[littlecounter] = new L.marker([answerCoordinates2[1], answerCoordinates2[0]], {draggable:'false', icon:hubColor2});
+              pmedianHubs[littlecounter].id = simpleCount2;
+
+              pmedianHubs[littlecounter].addTo(map);
+              littlecounter++;
+          }
+          simpleCount2++;
+          isThisAddressAHub = false;
+      });
+
+      // document.getElementById('solutionQuality').innerHTML = answerText;
 
     },
     error: function(){
@@ -217,4 +313,65 @@ function pmedianAjaxTrigger(){
       document.getElementById('solutionQuality').innerHTML = "(solution failed)";
     }
   });
+}
+
+function NoDuplicates(inputArray) {
+    var temp = {};
+    for (var i = 0; i < inputArray.length; i++)
+        temp[inputArray[i]] = true;
+    var uniqueArray = [];
+    for (var k in temp)
+        uniqueArray.push(k);
+    return uniqueArray;
+}
+
+function SpiderDiagrammer(hubAddress, colorIndicator, hubCoordinates, jsonOfPoints){
+    var spokeCounter = 0;
+    var mySpokesArray = new Array();
+    var mySpoke;
+
+
+    switch(colorIndicator%6) {
+        case 0:
+            mySpokeColor = "#ffffff";
+            break;
+        case 1:
+            mySpokeColor = "#ffffb2";
+            break;
+        case 2:
+            mySpokeColor = "#fc4e2a";
+            break;
+        case 3:
+            mySpokeColor = "#feb24c";
+            break;
+        case 4:
+            mySpokeColor = "#fd8d3c";
+            break;
+        case 5:
+            mySpokeColor = "#fed976";
+            break;
+        default:
+            mySpokeColor = "#ffffb2";
+    };
+
+    spokeCounter = 0;
+    $.each(newAnswer.features, function(i, v) {
+      // if the feature is assignted to the hubAddress, then draw the lines
+      if (v.properties.assignedTo == hubAddress) {
+          spokeEnds = v.geometry.coordinates;
+          mySpoke = [[hubCoordinates[1], hubCoordinates[0]],[spokeEnds[1],spokeEnds[0]]];
+          mySpokesArray[spokeCounter] = L.polyline(mySpoke);
+
+          //mySpokesArray[spokeCounter].setStyle({color: "#ffffff", weight: 1, opacity: 0.5});
+          mySpokesArray[spokeCounter].setStyle({color: mySpokeColor, weight: 1, opacity: 0.5});
+          mySpokesArray[spokeCounter].addTo(map);
+
+
+          pmedianMarkers = new L.circleMarker([spokeEnds[1],spokeEnds[0]], {radius: 2, fillColor: mySpokeColor, color:"#ffffff",weight:0,opacity:1,fillOpacity: 1 });
+          pmedianMarkers.addTo(map);
+          spokeCounter++;
+      }
+    });
+
+
 }
