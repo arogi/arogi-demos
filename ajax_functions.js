@@ -286,7 +286,7 @@ function pmedianAjaxTrigger(){
                       mhubColor2 = ffffb2Icon;
               };
 
-              pmedianHubs[littlecounter] = new L.marker([answerCoordinates2[1], answerCoordinates2[0]], {draggable:'false', icon:hubColor2});
+              pmedianHubs[littlecounter] = new L.marker([answerCoordinates2[1], answerCoordinates2[0]], {icon:hubColor2});
               pmedianHubs[littlecounter].id = simpleCount2;
 
               pmedianHubs[littlecounter].addTo(map);
@@ -328,6 +328,7 @@ function NoDuplicates(inputArray) {
 function SpiderDiagrammer(hubAddress, colorIndicator, hubCoordinates, jsonOfPoints){
     var spokeCounter = 0;
     var mySpokesArray = new Array();
+    var mySpokesArray2 = new Array();
     var mySpoke;
 
 
@@ -362,9 +363,15 @@ function SpiderDiagrammer(hubAddress, colorIndicator, hubCoordinates, jsonOfPoin
           mySpoke = [[hubCoordinates[1], hubCoordinates[0]],[spokeEnds[1],spokeEnds[0]]];
           mySpokesArray[spokeCounter] = L.polyline(mySpoke);
 
+          // main line set...  (has been coopted to make thick, translucent lines)
           //mySpokesArray[spokeCounter].setStyle({color: "#ffffff", weight: 1, opacity: 0.5});
-          mySpokesArray[spokeCounter].setStyle({color: mySpokeColor, weight: 1, opacity: 0.5});
+          mySpokesArray[spokeCounter].setStyle({color: mySpokeColor, weight: 16, opacity: 0.07});
           mySpokesArray[spokeCounter].addTo(map);
+
+          // a tack-on line to emphasize the other spoke lines... (careful, this drawing order is not very thoughtful)
+          mySpokesArray2[spokeCounter] = L.polyline(mySpoke);
+          mySpokesArray2[spokeCounter].setStyle({color: mySpokeColor, weight: 0.8, opacity: 1});
+          mySpokesArray2[spokeCounter].addTo(map);
 
 
           pmedianMarkers = new L.circleMarker([spokeEnds[1],spokeEnds[0]], {radius: 2, fillColor: mySpokeColor, color:"#ffffff",weight:0,opacity:1,fillOpacity: 1 });
