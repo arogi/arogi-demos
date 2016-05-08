@@ -147,11 +147,12 @@ function mclpAjaxTrigger(){
 function pmedianAjaxTrigger(){
 
   var useThisValueForP = document.getElementById('myPValue').innerHTML;
+  answeredGeoJson.properties.pValue = Number(useThisValueForP);
   var useTheseMarkers2 = JSON.stringify(answeredGeoJson);
 
   $.ajax({
     type: 'POST',
-    url: "interface/mirror.py",  // deliver the data to this script... it will answer back with a solution
+    url: "interface/pmedian_interface.py",  // deliver the data to this script... it will answer back with a solution
     data: {useTheseMarkers:useTheseMarkers2},
     success: function(answerText) {
 
