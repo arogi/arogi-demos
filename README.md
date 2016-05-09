@@ -1,4 +1,4 @@
-# arogi-web-demos
+# arogi-demos
 A web-accessible spatial optimization showcase from your pals at Arogi  
 
 
