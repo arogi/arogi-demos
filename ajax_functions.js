@@ -1,3 +1,85 @@
+function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
+
+  // this Haversine stuff is straight off of StackOverflow...
+  // so... we should examine it carefully.
+
+  var R = 6371.009; // Radius of the earth in km
+  var dLat = deg2rad(lat2-lat1);  // deg2rad below
+  var dLon = deg2rad(lon2-lon1);
+  var a =
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+    Math.sin(dLon/2) * Math.sin(dLon/2)
+    ;
+  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  var d = R * c; // Distance in km
+  return d;
+}
+
+function deg2rad(deg) {
+  return deg * (Math.PI/180)
+}
+
+
+function mclpCoverageCalculator(solutionGeoJson, hubIds, hubCoordinates, whichHub, newLatLon, theRadius){
+
+  pointCoveredOrNot = [];
+  pointCounter = 0;
+  // the point of this function is to calculate the amount of coverage after a marker is moved
+  // it's basically a point in polygon comparison, but since it is a circle, it is really easy
+  demandTotal = solutionGeoJson.properties.demandTotal;
+  // update hubCoordinates with the new coordinates...
+  hubCoordinates[whichHub] = [newLatLon.lng, newLatLon.lat];
+
+  // then for each hub, go through each point and see if it is close.
+  for (var i = 0, len = hubIds.length; i < len; i++) {
+      // get the hub coordinates
+      testHubCoordinates = hubCoordinates[i];
+      // go through all the points and calculate the distance from the hub coordinates to point's coordinates
+      oneMoreCounter = 0;
+      $.each(solutionGeoJson.features, function(i, v) {
+          testPointsCoordinates = v.geometry.coordinates;
+          testDistance = getDistanceFromLatLonInKm(testHubCoordinates[0], testHubCoordinates[1], testPointsCoordinates[0], testPointsCoordinates[1]);
+          // if the testDistance is less than or equal to the radius, then the point is covered... pointCoveredorNot = true ... else false... unless already true
+          if (testDistance <= theRadius) {
+            pointCoveredOrNot[oneMoreCounter] = true;
+          } else {
+            if (pointCoveredOrNot[oneMoreCounter] !== true) {
+              pointCoveredOrNot[oneMoreCounter] = false;
+            }
+          }
+          oneMoreCounter++;
+      });
+  }
+
+  coverTotalCalculator = 0;
+  coverIndexCounter = 0;
+  $.each(solutionGeoJson.features, function(i, v) {
+      if (pointCoveredOrNot[coverIndexCounter] === true) {
+        coverTotalCalculator = coverTotalCalculator + v.properties.pop;
+      };
+      coverIndexCounter++;
+  });
+
+  trueTotal = 0;
+  falseTotal = 0;
+  for (var j = 0, len = pointCoveredOrNot.length; j < len; j++) {
+      if (pointCoveredOrNot[j] === true) {
+        trueTotal++;
+      } else {
+        falseTotal++;
+      }
+  }
+
+  movedEfficacy = "covered: " + trueTotal + ", not: " + falseTotal + " = " + ((coverTotalCalculator/demandTotal)*100).toFixed(1) + "%";;
+
+  // alert(" :: " + whichHub + " :: " + hubIds[whichHub] + " :: " + newLatLon.lat);
+  // for each hub, do the following...
+
+  return movedEfficacy;
+}
+
+
 function mclpAjaxTrigger(){
 
   var pointMarkers2;
@@ -54,16 +136,13 @@ function mclpAjaxTrigger(){
       //   }
       // }
 
-      // Order of operations: remove all the cartography on the map, display the new stuff
+
       // clear all layers except the map background itself
       map.eachLayer(function (layer3) {
           if (layer3 != backgroundLayer) {
             map.removeLayer(layer3);
           };
       });
-
-
-
 
       // draw the new coverage circles...
       // and make them a little flashy
@@ -73,6 +152,9 @@ function mclpAjaxTrigger(){
       }, 100);
       // make an array of new circles
       simpleCount = 0;
+      idCounter = 0;
+      hubIds = [];
+      hubCoordinates = [];
       myRadius = (answeredGeoJson.properties.distanceValue * 1000);
       $.each(answeredGeoJson.features, function(i, v) {
           if (v.properties.facilityLocated == 1.0) {
@@ -80,14 +162,21 @@ function mclpAjaxTrigger(){
               circleArray[simpleCount] = new L.circle([answerCoordinates[1], answerCoordinates[0]], myRadius, {color: '#ffffff', fillColor: '#ffffff', fillOpacity: 0.9, weight:3, className:"myFade"});
               redDots[simpleCount] = new L.marker([answerCoordinates[1], answerCoordinates[0]], {draggable:'true', icon:redIcon});
               redDots[simpleCount].id = simpleCount;
+              // keep track of the p-median hub implicit ID addresses
+              // length of HubIds array should be same as p value
+              hubIds[simpleCount] = idCounter;
+              hubCoordinates[simpleCount] = answerCoordinates;
               simpleCount++;
+
           }
+          idCounter++;
 
       });
 
 
-
       //alert("number of circles: " + simpleCount);
+      // alert("ids of p facilities: " + hubIds);
+
       // add the coverage circles to the map
       newSimpleCount = 0;
       while (newSimpleCount < simpleCount) {
@@ -95,10 +184,8 @@ function mclpAjaxTrigger(){
         newSimpleCount++;
       }
 
-
       // clear the old map points and display the new ones
       // at least one version of these already exist because they are drawn on '$(document).ready'
-
       if (pointMarkers2 != undefined) {
         map.removeLayer(pointMarkers2);
       };
@@ -118,7 +205,6 @@ function mclpAjaxTrigger(){
         newSimpleCount++;
       };
 
-
       // enable the ability to drag red dots around, remove old circle marker, and draw a new one
       newSimpleCount = 0;
       while (newSimpleCount < simpleCount) {
@@ -136,13 +222,14 @@ function mclpAjaxTrigger(){
           circleArray[myMarker.id] = new L.circle([myPosition.lat, myPosition.lng], myRadius, {color: '#ffffff', fillColor: '#ffffff', fillOpacity: 0.9, weight:3, className:"myFade2"});
           circleArray[myMarker.id].addTo(map);
 
+          newEfficacy = mclpCoverageCalculator(answeredGeoJson, hubIds, hubCoordinates, myMarker.id, myPosition, useThisDistanceValue);
+          document.getElementById('solutionQuality').innerHTML = newEfficacy;
+
           // error checking... posts lat/long in solution efficacy area
-          // document.getElementById('solutionQuality').innerHTML = myPosition.lng.toFixed(2) + ", " + myPosition.lat.toFixed(2);
+          //document.getElementById('solutionQuality').innerHTML = hubIds[myMarker.id] + " : " + myPosition.lng.toFixed(2) + ", " + myPosition.lat.toFixed(2);
         });
         newSimpleCount++;
       };
-
-
 
     },
     error: function()
@@ -372,7 +459,6 @@ function SpiderDiagrammer(hubAddress, colorIndicator, hubCoordinates, jsonOfPoin
           mySpokesArray2[spokeCounter] = L.polyline(mySpoke);
           mySpokesArray2[spokeCounter].setStyle({color: mySpokeColor, weight: 0.8, opacity: 1});
           mySpokesArray2[spokeCounter].addTo(map);
-
 
           pmedianMarkers = new L.circleMarker([spokeEnds[1],spokeEnds[0]], {radius: 2, fillColor: mySpokeColor, color:"#ffffff",weight:0,opacity:1,fillOpacity: 1 });
           pmedianMarkers.addTo(map);
