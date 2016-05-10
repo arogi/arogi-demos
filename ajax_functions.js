@@ -23,7 +23,7 @@ function deg2rad(deg) {
 
 function mclpCoverageCalculator(solutionGeoJson, hubIds, hubCoordinates, whichHub, newLatLon, theRadius){
 
-  var highLightMarkers;
+  // var highLightMarkers;
 
   pointCoveredOrNot = [];
   pointCounter = 0;
@@ -41,15 +41,15 @@ function mclpCoverageCalculator(solutionGeoJson, hubIds, hubCoordinates, whichHu
       oneMoreCounter = 0;
       $.each(solutionGeoJson.features, function(i, v) {
           testPointsCoordinates = v.geometry.coordinates;
-          testDistance = getDistanceFromLatLonInKm(testHubCoordinates[0], testHubCoordinates[1], testPointsCoordinates[0], testPointsCoordinates[1]);
+          testDistance = getDistanceFromLatLonInKm(testHubCoordinates[1], testHubCoordinates[0], testPointsCoordinates[1], testPointsCoordinates[0]);
           // if the testDistance is less than or equal to the radius, then the point is covered... pointCoveredorNot = true ... else false... unless already true
           if (testDistance <= theRadius) {
             pointCoveredOrNot[oneMoreCounter] = true;
 
-            // yuck! can't get these to turn off!
-            randomColor = "#"+((1<<24)*Math.random()|0).toString(16) // made this random and ugly to call attention to the changes...
-            highlightMarkers = L.circleMarker([testPointsCoordinates[1], testPointsCoordinates[0]], {radius: 2, fillColor: randomColor, color:"#ffffff",weight:0,opacity:1,fillOpacity: 1 });
-            highlightMarkers.addTo(map);
+            // yuck! these are for debugging, but can't get them ever to turn off!
+            // randomColor = "#"+((1<<24)*Math.random()|0).toString(16) // made this random and ugly to call attention to the changes...
+            // highlightMarkers = L.circleMarker([testPointsCoordinates[1], testPointsCoordinates[0]], {radius: 2, fillColor: randomColor, color:"#ffffff",weight:0,opacity:1,fillOpacity: 1 });
+            // highlightMarkers.addTo(map);
 
           } else {
             if (pointCoveredOrNot[oneMoreCounter] != true) {
@@ -79,10 +79,8 @@ function mclpCoverageCalculator(solutionGeoJson, hubIds, hubCoordinates, whichHu
       }
   }
 
-  movedEfficacy = "covered: " + trueTotal + ", not: " + falseTotal + " = " + ((coverTotalCalculator/demandTotal)*100).toFixed(1) + "%";;
-
-  // alert(" :: " + whichHub + " :: " + hubIds[whichHub] + " :: " + newLatLon.lat);
-  // for each hub, do the following...
+  //movedEfficacy = "covered: " + trueTotal + ", not: " + falseTotal + " = " + ((coverTotalCalculator/demandTotal)*100).toFixed(1) + "%";
+  movedEfficacy = ((coverTotalCalculator/demandTotal)*100).toFixed(1) + "%";
 
   return movedEfficacy;
 }
