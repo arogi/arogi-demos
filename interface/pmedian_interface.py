@@ -15,7 +15,6 @@ def readJSONandSolve():
     RunAllPMedianExampleCppStyleAPI(p)
 
 def read_problem(file):
-    global numFeatures
     global numFacilities
     global facilityIDs
     global forcedFacilities
@@ -29,8 +28,6 @@ def read_problem(file):
       js = json.loads(file) # Convert the string into a JSON Object
     except IOError:
       print "unable to read file"
-
-    numFeatures = len(js['features'])
 
     # if the geoJSON includes a p value, use this rather than any input arguments
     try:
