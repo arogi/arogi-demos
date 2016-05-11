@@ -15,7 +15,6 @@ def readJSONandSolve():
     RunAllPMedianExampleCppStyleAPI(p)
 
 def read_problem(file):
-    global numFeatures
     global numFacilities
     global facilityIDs
     global forcedFacilities
@@ -29,8 +28,6 @@ def read_problem(file):
       js = json.loads(file) # Convert the string into a JSON Object
     except IOError:
       print "unable to read file"
-
-    numFeatures = len(js['features'])
 
     # if the geoJSON includes a p value, use this rather than any input arguments
     try:
@@ -96,7 +93,7 @@ def RunPMedianExampleCppStyleAPI(optimization_problem_type, p):
     BuildModel(solver, X, Y, p)
     SolveModel(solver, X, Y, p)
     
-    generateGEOJSON(X, Y, p)
+    generateGEOJSON(X, Y, p, solver.Objective().Value())
     return 1
 
 def PreComputeDistances():
@@ -171,7 +168,7 @@ def SolveModel(solver, X, Y, p):
     return 1
 
 
-def generateGEOJSON(X, Y, p):
+def generateGEOJSON(X, Y, p, solution):
 
     for j in range(numFacilities):
         located = Y[j].SolutionValue()
@@ -182,6 +179,10 @@ def generateGEOJSON(X, Y, p):
             if (X[i][j].SolutionValue() == True):
                 js['features'][demandIDs[i]]['properties']['assignedTo'] = facilityIDs[j]
                 break
+    
+    # update objective value
+    js['properties']['objectiveWeightedDistance'] = solution
+    
     return 1
 
 
