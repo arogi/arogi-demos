@@ -93,7 +93,7 @@ def RunPMedianExampleCppStyleAPI(optimization_problem_type, p):
     BuildModel(solver, X, Y, p)
     SolveModel(solver, X, Y, p)
     
-    generateGEOJSON(X, Y, p)
+    generateGEOJSON(X, Y, p, solver.Objective().Value())
     return 1
 
 def PreComputeDistances():
@@ -168,7 +168,7 @@ def SolveModel(solver, X, Y, p):
     return 1
 
 
-def generateGEOJSON(X, Y, p):
+def generateGEOJSON(X, Y, p, solution):
 
     for j in range(numFacilities):
         located = Y[j].SolutionValue()
@@ -179,6 +179,10 @@ def generateGEOJSON(X, Y, p):
             if (X[i][j].SolutionValue() == True):
                 js['features'][demandIDs[i]]['properties']['assignedTo'] = facilityIDs[j]
                 break
+    
+    # update objective value
+    js['properties']['objectiveWeightedDistance'] = solution
+    
     return 1
 
 
