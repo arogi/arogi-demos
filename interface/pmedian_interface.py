@@ -181,7 +181,7 @@ def generateGEOJSON(X, Y, p, solution):
                 break
     
     # update objective value
-    js['properties']['objectiveWeightedDistance'] = solution
+    js['properties']['objective'] = solution
     
     return 1
 
