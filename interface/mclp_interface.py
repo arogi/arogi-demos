@@ -7,12 +7,15 @@ import numpy as np
 from scipy.spatial.distance import cdist
 from ortools.linear_solver import pywraplp
 
+
 def main():
     ReadJSONandSolve()
 
+
 def ReadJSONandSolve():
     [p,SD] = read_problem(receivedMarkerData)
-    RunALLMCLPexampleCppStyleAPI(p, SD)
+    RunCBCMCLPexampleCppStyleAPI(p, SD)
+
 
 def read_problem(file):
     global numSites
@@ -20,44 +23,40 @@ def read_problem(file):
     global numDemands
     global numForced
     global facilityIDs
+    global forcedFacilities
     global demandIDs
-    global siteArray
-    global demandArray
+    global demandPop
     global js
     global demandTotal
     
-    p = -1
-    SD = -1
-    
-    # read data from string object
-    ###print 'Reading JSON String Object!'
     try:
-      js = json.loads(file) # Convert the string into a JSON Object
+        js = json.loads(file)
     except IOError:
-      print "unable to read file"
+        print 'Error reading file'
     
     numFeatures = len(js['features'])
     
     # if the geoJSON includes p and SD values, use these rather than any input arguments
     try:
-      p = js['properties']['pValue']
-    except IOError:
-      print "geoJSON has no pValue"
+        p = js['properties']['pValue']
+    except ValueError:
+        p = 3
+        print "no p-value exists, using p = 3 instead"
+
     try:
-      SD = js['properties']['distanceValue']*1000
-    except IOError:
-      print "geoJSON has no distanceValue"
-    
-    xyPointArray = [[None for k in range(2)] for j in range(numFeatures)]
-    xyPointArray = GISOps.GetCONUSeqDprojCoords(js) # Get the Distance Coordinates in CONUS EqD Projection
-    
+        SD = js['properties']['distanceValue']*1000
+    except ValueError:
+        SD = 2000
+        print "no SD-value exists, using SD = 2 km instead"
+
+
     facilityIDs = []
     demandIDs = []
-    demandTotal = 0
-    
+    forcedFacilities = []
+
     # rowID holds the index of each feature in the JSON object
     rowID = 0
-    
+
     # typeFD = Field Codes Represent:
     #  1 = demand only
     #  2 = potential facility only
@@ -66,83 +65,67 @@ def read_problem(file):
         if element['properties']['typeFD']==3: # Both Facility/Demand
             facilityIDs.append(rowID)
             demandIDs.append(rowID)
-            demandTotal += element['properties']['pop']
-            element['properties']['fillColor'] = '#46A346'
         elif element['properties']['typeFD']==2: # Facility Site Only
             facilityIDs.append(rowID)
-            element['properties']['fillColor'] = '#FDBC43'
         elif element['properties']['typeFD']==1: # Demand Point Only
             demandIDs.append(rowID)
-            demandTotal += element['properties']['pop']
-            element['properties']['fillColor'] = '#6198FD'
+        if element['properties']['forcedLocation'] == 1:
+            forcedFacilities.append(len(facilityIDs)-1)
         rowID += 1
-    
+
     numSites = len(facilityIDs)
     numDemands = len(demandIDs)
-    
-    siteArray = [[None for k in range(3)] for j in range(numSites)]
-    demandArray = [[None for k in range(3)] for j in range(numDemands)]
-    
-    # assemble pertinent data for the model into multidimensional arrays
-    i = 0
-    j = 0
-    k = 0
-    for line in js['features']:
-      if line['properties']['typeFD']>=2:  # Potential facility site
-        siteArray[i][0] = xyPointArray[k][0]
-        siteArray[i][1] = xyPointArray[k][1]
-        siteArray[i][2] = line['properties']['forcedLocation']
-        i += 1
-      if line['properties']['typeFD'] % 2 == 1:  # Demand point
-        demandArray[j][0] = xyPointArray[k][0]
-        demandArray[j][1] = xyPointArray[k][1]
-        demandArray[j][2] = line['properties']['pop']
-        j += 1
-      k += 1
-    
-    numForced = sum(zip(*siteArray)[2])
-    demandTotal = sum(zip(*demandArray)[2])
-    js['properties']['demandTotal'] = demandTotal
-    
-    ###print 'Finished Reading the Data!'
-    return [p, SD]
+    numForced = len(forcedFacilities)
 
-def RunALLMCLPexampleCppStyleAPI(p, SD):
-    if hasattr(pywraplp.Solver, 'GLPK_MIXED_INTEGER_PROGRAMMING'):
-        ###Announce('GLPK', 'C++ style API')
-        RunMCLPexampleCppStyleAPI(pywraplp.Solver.GLPK_MIXED_INTEGER_PROGRAMMING, p, SD)
-    if hasattr(pywraplp.Solver, 'CBC_MIXED_INTEGER_PROGRAMMING'):
-        ###Announce('CBC', 'C++ style API')
-        RunMCLPexampleCppStyleAPI(pywraplp.Solver.CBC_MIXED_INTEGER_PROGRAMMING, p, SD)
-    if hasattr(pywraplp.Solver, 'SCIP_MIXED_INTEGER_PROGRAMMING'):
-        ###Announce('SCIP', 'C++ style API')
-        RunMCLPexampleCppStyleAPI(pywraplp.Solver.SCIP_MIXED_INTEGER_PROGRAMMING, p, SD)
-    return 1
+    demandPop = [js['features'][i]['properties']['pop'] for i in demandIDs]
+
+    demandTotal = sum(demandPop)
+    js['properties']['demandTotal'] = demandTotal
+
+    # check if valid for the given p
+    try:
+      if numForced > p:
+        raise DataError('numForcedGreaterThanP')
+    except DataError:
+      print 'number of forced facilities is greater than p'
+      raise
+    
+    return [p, SD]
+    
+
+def RunCBCMCLPexampleCppStyleAPI(p, SD):
+  if hasattr(pywraplp.Solver, 'CBC_MIXED_INTEGER_PROGRAMMING'):
+    ###Announce('CBC', 'C++ style API')
+    RunMCLPexampleCppStyleAPI(pywraplp.Solver.CBC_MIXED_INTEGER_PROGRAMMING, p, SD)
+    return 0
+
 
 def RunMCLPexampleCppStyleAPI(optimization_problem_type, p, SD):
     """ Example of simple MCLP program with the C++ style API."""
     solver = pywraplp.Solver('RunIntegerExampleCppStyleAPI', optimization_problem_type)
-    infinity = solver.infinity()
-
-    #declare a couple variables
-    name = ''
-
+    
     # Create a global version of:
     # Facility Site Variable X
-    X = [-1] * numSites # Note, these will need to be updated if we start to consider demands/facility sites seperately
+    X = [None] * numSites
 
     # Coverage Variable Y  - NOTE!!: Matt used the Minimization form where:
     # Y = 1 if it is NOT COVERED by a facility located within SD of demand Yi
-    Y = [-1] * numDemands # Note, these will need to be updated if we start to consider demands/facility sites seperately
+    Y = [None] * numDemands
+
+    computeCoverageMatrix(SD)
+
+    BuildModel(solver, X, Y, p)
+    SolveModel(solver)
+
+    demandCovered = demandTotal - solver.Objective().Value()
+
+    generateGEOJSON(X, Y, demandCovered)
+    return 0
+
+
+def BuildModel(solver, X, Y, p):
     
-    SDsquared = SD*SD
-    
-    A = [demandArray[i][0:2] for i in range(numDemands)]    
-    B = [siteArray[j][0:2] for j in range(numSites)]
-    
-    # Determine neighborhood of sites within SD of each other
-    Nrows,Ncols = np.nonzero(((cdist(A, B,'sqeuclidean') <= SDsquared).astype(bool)))
-    Nsize = len(Nrows)
+    infinity = solver.infinity()
     
     # DECLARE CONSTRAINTS:
     # declare demand coverage constraints (binary integer: 1 if UNCOVERED, 0 if COVERED)
@@ -158,92 +141,86 @@ def RunMCLPexampleCppStyleAPI(optimization_problem_type, p, SD):
     objective = solver.Objective()
     objective.SetMinimization()
     
-    # generate the objective function and constraints
-    k = 0
+    # Add potential facility sites to the p constraint
     for j in range(numSites):
-        # initialize the X and Y variables as Binary Integer (Boolean) variables
+        # initialize the X variables as Binary Integer (Boolean) variables
         name = "X,%d" % facilityIDs[j]
         X[j] = solver.BoolVar(name)
         c2.SetCoefficient(X[j],1)
-        if siteArray[j][2] == 1:
-          c3[k] = solver.Constraint(1,1)
-          c3[k].SetCoefficient(X[j],1)
-          k += 1
     
+    # if facility is fixed into the solution, add a constraint to make it so
+    for k in range(numForced):
+          c3[k] = solver.Constraint(1,1)
+          c3[k].SetCoefficient(X[forcedFacilities[k]],1)
+    
+    # add demands to the objective and coverage constraints
     for i in range(numDemands):
         name = "Y,%d" % demandIDs[i]
+        # initialize the Y variables as Binary Integer (Boolean) variables
         Y[i] = solver.BoolVar(name)
         # Set the Objective Coefficients for the population * Demand Variable (Yi)
-        objective.SetCoefficient(Y[i],demandArray[i][2])
+        objective.SetCoefficient(Y[i],demandPop[i])
         # Covering constraints
         c1[i] = solver.Constraint(1, solver.infinity())
         c1[i].SetCoefficient(Y[i],1)
-    
+
+    # add facility coverages to the coverage constraints
     for k in range(Nsize):
         c1[Nrows[k]].SetCoefficient(X[Ncols[k]],1)
     
-    SolveAndPrint(solver, X, Y, p, SD)
-    return 1
-
-def SolveAndPrint(solver, X, Y, p, SD):
-    """Solve the problem and print the solution."""
-    ###print 'Number of variables = %d' % solver.NumVariables()
-    ###print 'Number of constraints = %d' % solver.NumConstraints()
-
-    result_status = solver.Solve()
-
-    # The problem has an optimal solution.
-    assert result_status == pywraplp.Solver.OPTIMAL, "The problem does not have an optimal solution!"
-
-    # The solution looks legit (when using solvers others than
-    # GLOP_LINEAR_PROGRAMMING, verifying the solution is highly recommended!).
-    assert solver.VerifySolution(1e-7, True)
-
-    ###print 'Problem solved in %f milliseconds' % solver.wall_time()
-
-    # The objective value of the solution.
-    ###print 'Optimal objective value = %f' % solver.Objective().Value()
-
-    # print the selected sites
-    count = -1
-    ### for j in facilityIDs:
-    ###   count += 1
-    ###   if (X[count].SolutionValue() == 1.0):
-    ###     print "Site selected %d" % (j)
-
-    generateGEOJSON(X, Y, p, SD)
-    return 1
+    return 0
 
 
-def generateGEOJSON(X, Y, p, SD):
-    #global js
-    #print numFeatures
-    demandCovered = 0
-    covered = -1
-    located = -1
-    count = 0
-    for j in facilityIDs:
-      located = X[count].SolutionValue()
-      js['features'][j]['properties']['facilityLocated'] = located
-      if located == 1:
-        js['features'][j]['properties']['fillColor'] = '#DD2727'
-      count += 1
+def computeCoverageMatrix(SD):
+        
+    #declare a couple variables
+    global Nrows
+    global Ncols
+    global Nsize
+    
+    SDsquared = SD*SD
+    
+    # Convert Coordinates from Lat/Long to CONUS EqD Projection
+    xyPointArray = GISOps.GetCONUSeqDprojCoords(js)
+    A = [xyPointArray[i][:] for i in demandIDs]
+    B = [xyPointArray[j][:] for j in facilityIDs]
+    
+    # Determine neighborhood of sites within SD of each other
+    Nrows,Ncols = np.nonzero(((cdist(A, B,'sqeuclidean') <= SDsquared).astype(bool)))
+    Nsize = len(Nrows)
 
-    count = 0
-    for i in demandIDs:
-      covered = 1 - Y[count].SolutionValue()
-      js['features'][i]['properties']['covered'] = covered
-      if covered == 1:
-        demandCovered += js['features'][i]['properties']['pop']
-      count += 1
+    return 0
 
-    js['properties']['demandCovered'] = demandCovered
-    js['properties']['efficacyPercentage'] = float(demandCovered) / demandTotal
+def SolveModel(solver):
+  """Solve the problem and print the solution."""
+  result_status = solver.Solve()
 
-    ### As of this moment js is the output file... ready to be delivered back to
-    ### as the solution
-    return 1
+  # The problem has an optimal solution.
+  assert result_status == pywraplp.Solver.OPTIMAL, "The problem does not have an optimal solution!"
 
+  # The solution looks legit (when using solvers others than
+  # GLOP_LINEAR_PROGRAMMING, verifying the solution is highly recommended!).
+  assert solver.VerifySolution(1e-7, True)
+                
+
+def generateGEOJSON(X, Y, demandCovered):
+  
+  count = 0
+  for j in facilityIDs:
+    located = X[count].SolutionValue()
+    js['features'][j]['properties']['facilityLocated'] = located
+    count += 1
+  
+  count = 0
+  for i in demandIDs:
+    # NOTE: it is 1 - Y[j] because Y[j] is 1 if it is NOT covered
+    covered = 1 - Y[count].SolutionValue()
+    js['features'][i]['properties']['covered'] = covered
+    count += 1
+  
+  js['properties']['demandCovered'] = demandCovered
+  js['properties']['efficacyPercentage'] = float(demandCovered) / demandTotal
+  
 
 
 
