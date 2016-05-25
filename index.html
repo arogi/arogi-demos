@@ -83,22 +83,24 @@
 
 
   // this loads the geoJSON, with the code everything is held up until the file loads
-  $.when($.getJSON("data/mclp_data_100.geojson")).done(function(defaultMarkers) {
+  $.when($.getJSON("data/mclp_data_500.geojson")).done(function(defaultMarkers) {
+    $.when($.getJSON("data/pmedian_data_100.geojson")).done(function(pMedianMarkers) {
+      // this gets called on document.ready since the map needs a bounding area and
+      // the initial ajax call might take a long time.
+      answeredGeoJson = defaultMarkers;
+      answeredPGeoJson = pMedianMarkers;
+      var pointMarkers = L.geoJson(answeredGeoJson, {
+        pointToLayer: function (feature, latlng) {
+          return L.circleMarker(latlng);
+        }
+      });
+      // but the points do not need to be shown
+      //pointMarkers.addTo(map);
 
-    // this gets called on document.ready since the map needs a bounding area and
-    // the initial ajax call might take a long time.
-    answeredGeoJson = defaultMarkers;
-    var pointMarkers = L.geoJson(answeredGeoJson, {
-      pointToLayer: function (feature, latlng) {
-        return L.circleMarker(latlng);
-      }
+      map.fitBounds(pointMarkers, {padding:[140,140]});
+
+      mclpAjaxTrigger();
     });
-    // but the points do not need to be shown
-    //pointMarkers.addTo(map);
-    
-    map.fitBounds(pointMarkers, {padding:[140,140]});
-
-    mclpAjaxTrigger();
   });
 
 

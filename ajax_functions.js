@@ -298,9 +298,11 @@ function pmedianAjaxTrigger(){
 
   // pmedianMarkers = [];
 
+
+
   var useThisValueForP = document.getElementById('myPValue').innerHTML;
-  answeredGeoJson.properties.pValue = Number(useThisValueForP);
-  var useTheseMarkers2 = JSON.stringify(answeredGeoJson);
+  answeredPGeoJson.properties.pValue = Number(useThisValueForP);
+  var useTheseMarkers2 = JSON.stringify(answeredPGeoJson);
 
   $.ajax({
     type: 'POST',
