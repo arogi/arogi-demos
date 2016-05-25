@@ -10,7 +10,6 @@
   <script src="ajax_functions.js"></script>
   <!-- // this loads a geojson of starting points.
   // the variable is called defaultMarkers -->
-  <script src="data/mclp_data_100.js"></script>
 
 
   <style>
@@ -82,95 +81,99 @@
 
   <script>
 
-  $(document).ready(function() {
 
-    circleArray = new Array();
-    redDots = new Array();
-    pmedianHubs = new Array();
-    simpleCount = 0;
-    var pointMarkers;
-    var pmedianMarkers;
-    problemState = 0;
+  // this loads the geoJSON, with the code everything is held up until the file loads
+  $.when($.getJSON("data/mclp_data_100.geojson")).done(function(defaultMarkers) {
+
+    // this gets called on document.ready since the map needs a bounding area and
+    // the initial ajax call might take a long time.
+    answeredGeoJson = defaultMarkers;
+    var pointMarkers = L.geoJson(answeredGeoJson, {
+      pointToLayer: function (feature, latlng) {
+        return L.circleMarker(latlng);
+      }
+    });
+    // but the points do not need to be shown
+    //pointMarkers.addTo(map);
+    
+    map.fitBounds(pointMarkers, {padding:[140,140]});
 
     mclpAjaxTrigger();
+  });
 
 
+    $(document).ready(function() {
 
+      circleArray = new Array();
+      redDots = new Array();
+      pmedianHubs = new Array();
+      simpleCount = 0;
+      var pointMarkers;
+      var pmedianMarkers;
+      problemState = 0;
 
-    // toggle the Max Cover and p-Median UIs
-    $('#three-dots').click(function(){
-      if (document.getElementById('arogi-top-zone').innerHTML == "p-Median") {
-        // now set to Maximal Cover
-        document.getElementById('arogi-top-zone').innerHTML = "Maximal Cover";
-        problemState = 0;
-        document.querySelector("#arogi-menu-middle").style.height = "120px";
-        $("#distance-slider-area").show();
-        document.getElementById('arogi-sub-left').innerHTML = "Demand Covered<br /><span id=\"solutionQuality\"></span>";
-        mclpAjaxTrigger();
+      // toggle the Max Cover and p-Median UIs
+      $('#three-dots').click(function(){
+        if (document.getElementById('arogi-top-zone').innerHTML == "p-Median") {
+          // now set to Maximal Cover
+          document.getElementById('arogi-top-zone').innerHTML = "Maximal Cover";
+          problemState = 0;
+          document.querySelector("#arogi-menu-middle").style.height = "120px";
+          $("#distance-slider-area").show();
+          document.getElementById('arogi-sub-left').innerHTML = "Demand Covered<br /><span id=\"solutionQuality\"></span>";
+          mclpAjaxTrigger();
 
-      } else {
-        // now set to p-Median
-        document.getElementById('arogi-top-zone').innerHTML = "p-Median";
-        problemState = 1;
-        $("#distance-slider-area").hide();
-        document.querySelector("#arogi-menu-middle").style.height = "60px";
-        document.getElementById('arogi-sub-left').innerHTML = "Median Distance<br /><span id=\"solutionQuality\"></span>";
-        pmedianAjaxTrigger();
+        } else {
+          // now set to p-Median
+          document.getElementById('arogi-top-zone').innerHTML = "p-Median";
+          problemState = 1;
+          $("#distance-slider-area").hide();
+          document.querySelector("#arogi-menu-middle").style.height = "60px";
+          document.getElementById('arogi-sub-left').innerHTML = "Median Distance<br /><span id=\"solutionQuality\"></span>";
+          pmedianAjaxTrigger();
 
-      };
+        };
+      });
+
     });
 
-  });
-
-  $("#pSlider").on('change', function(){
-    switch (problemState) {
+    $("#pSlider").on('change', function(){
+      switch (problemState) {
         case 0: // mclp
-          mclpAjaxTrigger();
-          break;
+        mclpAjaxTrigger();
+        break;
         case 1: // p-median
-          pmedianAjaxTrigger();
-          break;
-    };
+        pmedianAjaxTrigger();
+        break;
+      };
 
-  });
+    });
 
-  $("#distanceSlider").on('change', function(){
-    mclpAjaxTrigger();
-  });
+    $("#distanceSlider").on('change', function(){
+      mclpAjaxTrigger();
+    });
 
-  // toggle the menus on and off
-  $('#arogi-top-zone').click(function(){
-    $('#arogi-menu-upper').toggle();
-    $('#arogi-menu-middle').toggle();
-    $('#arogi-menu-bottom').toggle();
-  });
-
-
-  // add basemap tiles from Mapzen's Tangram
-  var map = L.map('map', {zoomControl: false});
-  var backgroundLayer = Tangram.leafletLayer({
-    scene: 'grayprint.yaml',
-    attribution: '<a href="arogi.com">Arogi</a> | &copy; <a href="http://osm.org">OpenSteetMap</a> | <a href="https://mapzen.com/tangram" target="_blank">Mapzen</a>'
-  });
-  backgroundLayer.addTo(map);
-  map.attributionControl.setPrefix(""); // Leaflet prefix removed to afford an ordering change.
-
-  L.control.scale().setPosition('bottomright').addTo(map);
-  new L.Control.Zoom({ position: 'bottomright' }).addTo(map);
+    // toggle the menus on and off
+    $('#arogi-top-zone').click(function(){
+      $('#arogi-menu-upper').toggle();
+      $('#arogi-menu-middle').toggle();
+      $('#arogi-menu-bottom').toggle();
+    });
 
 
-  // this gets called on document.ready since the map needs a bounding area and
-  // the initial ajax call might take a long time.
-  answeredGeoJson = defaultMarkers;
-  var pointMarkers = L.geoJson(answeredGeoJson, {
-    pointToLayer: function (feature, latlng) {
-      return L.circleMarker(latlng);
-    }
-  });
-  // but the points do not need to be shown
-  //pointMarkers.addTo(map);
+    // set up most of the map... but not the data and not instantiating it
+    var map = L.map('map', {zoomControl: false});
+    var backgroundLayer = Tangram.leafletLayer({
+      scene: 'grayprint.yaml',
+      attribution: '<a href="arogi.com">Arogi</a> | &copy; <a href="http://osm.org">OpenSteetMap</a> | <a href="https://mapzen.com/tangram" target="_blank">Mapzen</a>'
+    });
+    backgroundLayer.addTo(map);
+    map.attributionControl.setPrefix(""); // Leaflet prefix removed to afford an ordering change.
 
-  map.fitBounds(pointMarkers, {padding:[140,140]});
+    L.control.scale().setPosition('bottomright').addTo(map);
+    new L.Control.Zoom({ position: 'bottomright' }).addTo(map);
+
+
 
   </script>
 
