@@ -319,6 +319,7 @@ function pmedianAjaxTrigger(){
       });
 
       newAnswer = JSON.parse(answerText);
+      document.getElementById('solutionQuality').innerHTML = (Math.log10(newAnswer.properties.objective)).toFixed(3);
 
       var inputArray = [];
       var uniquesArray = [];
