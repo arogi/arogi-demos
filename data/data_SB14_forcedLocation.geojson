@@ -8,9 +8,7 @@
   },
   "properties": {
     "pValue": 3,
-    "solveForUnweighted": 0, 
-    "objectiveWeightedDistance": -1,
-    "objectiveUnweightedDistance": -1
+    "distanceValue": 2
   },
   "features": [
     {
@@ -19,9 +17,7 @@
         "pointID": 1,
         "pop": 100,
         "typeFD": 3,
-        "forcedLocation": 0,
-        "facilityLocated": -1,
-        "assignedTo": -1
+        "forcedLocation": 0
       },
       "geometry": {
         "type": "Point",
@@ -37,9 +33,7 @@
         "pointID": 2,
         "pop": 250,
         "typeFD": 3,
-        "forcedLocation": 0,
-        "facilityLocated": -1,
-        "assignedTo": -1
+        "forcedLocation": 0
       },
       "geometry": {
         "type": "Point",
@@ -55,9 +49,7 @@
         "pointID": 3,
         "pop": 50,
         "typeFD": 1,
-        "forcedLocation": 0,
-        "facilityLocated": -1,
-        "assignedTo": -1
+        "forcedLocation": 0
       },
       "geometry": {
         "type": "Point",
@@ -73,9 +65,7 @@
         "pointID": 4,
         "pop": 0,
         "typeFD": 2,
-        "forcedLocation": 0,
-        "facilityLocated": -1,
-        "assignedTo": -1
+        "forcedLocation": 0
       },
       "geometry": {
         "type": "Point",
@@ -91,9 +81,7 @@
         "pointID": 5,
         "pop": 250,
         "typeFD": 3,
-        "forcedLocation": 0,
-        "facilityLocated": -1,
-        "assignedTo": -1
+        "forcedLocation": 0
       },
       "geometry": {
         "type": "Point",
@@ -109,9 +97,7 @@
         "pointID": 6,
         "pop": 500,
         "typeFD": 1,
-        "forcedLocation": 0,
-        "facilityLocated": -1,
-        "assignedTo": -1
+        "forcedLocation": 0
       },
       "geometry": {
         "type": "Point",
@@ -127,9 +113,7 @@
         "pointID": 7,
         "pop": 100,
         "typeFD": 3,
-        "forcedLocation": 0,
-        "facilityLocated": -1,
-        "assignedTo": -1
+        "forcedLocation": 0
       },
       "geometry": {
         "type": "Point",
@@ -145,9 +129,7 @@
         "pointID": 8,
         "pop": 150,
         "typeFD": 3,
-        "forcedLocation": 0,
-        "facilityLocated": -1,
-        "assignedTo": -1
+        "forcedLocation": 0
       },
       "geometry": {
         "type": "Point",
@@ -163,9 +145,7 @@
         "pointID": 9,
         "pop": 250,
         "typeFD": 3,
-        "forcedLocation": 0,
-        "facilityLocated": -1,
-        "assignedTo": -1
+        "forcedLocation": 0
       },
       "geometry": {
         "type": "Point",
@@ -181,9 +161,7 @@
         "pointID": 10,
         "pop": 300,
         "typeFD": 1,
-        "forcedLocation": 0,
-        "facilityLocated": -1,
-        "assignedTo": -1
+        "forcedLocation": 0
       },
       "geometry": {
         "type": "Point",
@@ -199,9 +177,7 @@
         "pointID": 11,
         "pop": 1000,
         "typeFD": 1,
-        "forcedLocation": 0,
-        "facilityLocated": -1,
-        "assignedTo": -1
+        "forcedLocation": 0
       },
       "geometry": {
         "type": "Point",
@@ -217,9 +193,7 @@
         "pointID": 12,
         "pop": 50,
         "typeFD": 3,
-        "forcedLocation": 0,
-        "facilityLocated": -1,
-        "assignedTo": -1
+        "forcedLocation": 1
       },
       "geometry": {
         "type": "Point",
@@ -235,9 +209,7 @@
         "pointID": 13,
         "pop": 0,
         "typeFD": 2,
-        "forcedLocation": 0,
-        "facilityLocated": -1,
-        "assignedTo": -1
+        "forcedLocation": 0
       },
       "geometry": {
         "type": "Point",
@@ -253,9 +225,7 @@
         "pointID": 14,
         "pop": 50,
         "typeFD": 3,
-        "forcedLocation": 0,
-        "facilityLocated": -1,
-        "assignedTo": -1
+        "forcedLocation": 0
       },
       "geometry": {
         "type": "Point",
