@@ -36,7 +36,7 @@ to see a list of all local docker containers. Note the name it gives as a label.
 
 The steps above are sufficient to start your own arogi local web host.  However, if you wish to play around with the image you can do so as follows:
 
-1. Type: `docker ps -a'
+1. Type: `docker ps -a`
 and note the name of the container. If you have followed the directions above you probably still have a running container.
 
 2. Type: `docker stop container_name`
