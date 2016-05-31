@@ -16,6 +16,11 @@
     - You need to make sure that the docker virtual machine is attached to your terminal. Run the following commands:
       `TBD` #I need to test this on Windows and list the proper syntax.
 
+- <i>If running Mac OS X, initiate the docker virtual machine by entering the following three commands in the prompt</i>
+  - `docker-machine start`
+  - `docker-machine env`
+  - `eval $(docker-machine env)`
+
 *Getting Started*
 
  1. Type: `docker pull arogi/circuit-web`  
