@@ -5,11 +5,9 @@
 
  1. Install Docker. Their webpage has [instructions](https://docs.docker.com/engine/installation/).
 
- 2. Access Docker via a Terminal shell:
-    - *Linux Users*, proceed to Step 1 of Getting Started.
-    - *Windows and OS X*, use the Docker Quickstart Terminal.
+ 2. In Windows and OS X, use the Docker Quickstart Terminal to access Docker. Linux uses the standard Terminal.
 
- 3. To make a local copy of arogi-demos, in a Terminal shell, type:  
+ 3. Make a local copy of arogi-demos. Type:  
     `git clone https://github.com/arogi/arogi-demos.git`
 
 
