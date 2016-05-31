@@ -6,15 +6,15 @@
 - Install docker. Their webpage has [instructions](https://docs.docker.com/engine/installation/).
 
 - Go to your computer's Terminal shell prompt.
-    *Linux Users*
-    - You don't need to do anything further.
-    *OS X users*
-    - You need to make sure that the docker virtual machine is attached to your terminal. Run the following commands:
-      `docker-machine start` #This will ensure the vm is running. If you are sure it is you can skip this step.
-      `docker-machine env && eval $(docker-machine env)`
-    *Windows Users*
-    - You need to make sure that the docker virtual machine is attached to your terminal. Run the following commands:
-      `TBD` #I need to test this on Windows and list the proper syntax.
+    - *Linux Users*
+      - You don't need to do anything further.
+    - *OS X users*
+      - You need to make sure that the docker virtual machine is attached to your terminal. Run the following commands:
+        - `docker-machine start` #This will ensure the vm is running. If you are sure it is you can skip this step.
+        - `docker-machine env && eval $(docker-machine env)`
+    - *Windows Users*
+      - You need to make sure that the docker virtual machine is attached to your terminal. Run the following commands:
+        - `TBD` #I need to test this on Windows and list the proper syntax.
 
 *Getting Started*
 
