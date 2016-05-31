@@ -14,7 +14,7 @@
         - `docker-machine env && eval $(docker-machine env)`
     - *Windows Users*
       - You need to make sure that the docker virtual machine is attached to your terminal. Run the following commands:
-        - `TBD` #I need to test this on Windows and list the proper syntax.
+        - `TBD` # Need to test this on Windows and list the proper syntax.
 
 *Getting Started*
 
