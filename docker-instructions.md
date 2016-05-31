@@ -7,6 +7,11 @@
 
 - Go to your computer's Terminal shell prompt.
 
+- <i>If running Mac OS X, initiate the docker virtual machine by entering the following three commands in the prompt</i>
+  - `docker-machine start`
+  - `docker-machine env`
+  - `eval $(docker-machine env)`
+
 *Getting Started*
 
 1. Type: `docker pull tniblett/arogi-apache-cgi`  
