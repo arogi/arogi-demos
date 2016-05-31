@@ -17,7 +17,7 @@
     to grab the latest Arogi docker image.
 
  2. Type: `docker run -it -p 80:80 -d -v ~/repos/arogi-demos/:/var/www/html arogi/circuit-web`  
-    In that statement, replace `~/repos/arogi-demos/` with the pathname to your local repository. If using Windows, follow this pattern instead: `-v /c/Users/My\ User\ Name/repos:`
+    In that statement, replace `~/repos/arogi-demos/` with the pathname to your local repository.
 
  3. Type `localhost`  
     in your browser address bar. On OS X and Windows, use this address: `192.168.99.100`
