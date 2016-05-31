@@ -3,9 +3,9 @@
 
 *Prerequisites*  
 
-- Install Docker. Their webpage has [instructions](https://docs.docker.com/engine/installation/).
+ 1. Install Docker. Their webpage has [instructions](https://docs.docker.com/engine/installation/).
 
-- Go to your Terminal shell.
+ 2. Go to your Terminal shell.
     - *Linux Users*, proceed to Step 1 of Getting Started.
     - *OS X users*, Docker can only be run within a virtual machine.  
         - Type: `docker-machine start`. This will ensure the vm is running. If you are sure it is you can skip this step.
