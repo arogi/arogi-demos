@@ -1,7 +1,7 @@
 <b>Using Docker with Arogi-Demos</b>  
 <hr />
 
-*Prerequisite*  
+*Prerequisites*  
 
 - Install Docker. Their webpage has [instructions](https://docs.docker.com/engine/installation/).
 
