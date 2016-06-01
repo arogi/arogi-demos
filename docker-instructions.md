@@ -19,8 +19,9 @@
  2. Type: `docker run -it -p 80:80 -d -v ~/repos/arogi-demos/:/var/www/html arogi/circuit-web`  
     In that statement, replace `~/repos/arogi-demos/` with the pathname to your local repository.
 
- 3. Type `localhost`  
-    in your browser address bar. On OS X and Windows, use this address: `192.168.99.100`
+ 3. Open a web browser and enter the following into the address bar:
+    If using Linux, enter `localhost`
+    On OS X and Windows, enter this address: `192.168.99.100`
 
 
 *Shutting Down*  
