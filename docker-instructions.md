@@ -25,7 +25,7 @@
 
 *Shutting Down*  
 
- 1. Return to your Docker terminal. On Linux, do so by pressing `ctrl-p` followed by `ctrl-q`
+ 1. Return to your Docker terminal.
 
  2. Type: `docker ps -a`  
     to see a list of all local docker containers. Note the name it gives as a label. It often is something like: `silly_tonsils`
