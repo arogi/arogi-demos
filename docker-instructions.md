@@ -1,38 +1,37 @@
 <b>Using Docker with Arogi-Demos</b>  
 <hr />
 
-*Prerequisite*  
+*Prerequisites*  
 
-- Install docker. Their webpage has [instructions](https://docs.docker.com/engine/installation/).
+ 1. Install Docker. Their webpage has [instructions](https://docs.docker.com/engine/installation/).
 
-- Go to your computer's Terminal shell prompt.
+ 2. In Windows and OS X, launch the Docker Quickstart Terminal. Linux uses the standard Terminal.
+
+ 3. Make a local copy of arogi-demos. Type:  
+    `git clone https://github.com/arogi/arogi-demos.git`
+
 
 *Getting Started*
 
-1. Type: `docker pull tniblett/arogi-apache-cgi`  
-to grab the latest Arogi docker image. 
+ 1. Type: `docker pull arogi/circuit-web`  
+    to grab the latest Arogi Docker image.
 
-2. Type: `docker run -it -p 80:80 -d -v ~/repos/arogi-demos/:/var/www/html tniblett/arogi-apache-cgi /bin/bash`  
-In that statement, replace `~/repos/arogi-demos/` with the pathname to your local repository. This associates the image to your working local repo.
+ 2. Type: `docker run -it -p 80:80 -d -v ~/repos/arogi-demos/:/var/www/html arogi/circuit-web`  
+    In that statement, replace `~/repos/arogi-demos/` with the pathname to your local repository.
 
-3. Type: `docker ps -a`  
-to see a list of local docker containers. Note the name it gives as a label. It often is something like: `silly_tonsils`
+ 3. Type `localhost`  
+    in your browser address bar. On OS X and Windows, use this address: `192.168.99.100`
 
-4. Type: `docker attach container_name`  
-to connect to the container. From there, you might need to press carriage return to get the terminal prompt.
-
-5. Type: `service apache2 start`  
-From within docker's terminal, this will start the container's local apache webserver.
-
-6. Type `localhost`  
-in your browser address bar to play with the demos. 
 
 *Shutting Down*  
 
-1. You can return to your local machine's command prompt by pressing `ctrl-p` followed by `ctrl-q`
+ 1. Return to your local machine's command prompt by pressing `ctrl-p` followed by `ctrl-q`
 
-2. Type: `docker stop container_name` to stop docker. Note: You can restart again if you like with `docker start docker_name`
+ 2. Type: `docker ps -a`  
+    to see a list of all local docker containers. Note the name it gives as a label. It often is something like: `silly_tonsils`
 
-3. If you want to remove the container, type: `docker rm container_name`
+ 3. To stop Docker, type: `docker stop container_name`
 
-4. To remove the image, type: `docker rmi image_name` (e.g., `docker rmi tniblett/arogi-apache-cgi`)
+ 4. To remove the container, type: `docker rm container_name`
+
+ 5. To remove the image, type: `docker rmi image_name` (e.g., `docker rmi arogi/circuit-web`)
