@@ -20,8 +20,7 @@
     In that statement, replace `~/repos/arogi-demos/` with the pathname to your local repository.
 
  3. Open a web browser and enter the following into the address bar:  
-     If using Linux, enter `localhost`  
-     On OS X and Windows, enter this address: `192.168.99.100`  
+     On OS X and Windows, enter this address: `192.168.99.100`. On Linux, enter `localhost`  
 
 
 *Shutting Down*  
