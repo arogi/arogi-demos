@@ -19,13 +19,13 @@
  2. Type: `docker run -it -p 80:80 -d -v ~/repos/arogi-demos/:/var/www/html arogi/circuit-web`  
     In that statement, replace `~/repos/arogi-demos/` with the pathname to your local repository.
 
- 3. Type `localhost`  
-    in your browser address bar. On OS X and Windows, use this address: `192.168.99.100`
+ 3. Open a web browser and enter the following into the address bar:  
+     On OS X and Windows, enter `192.168.99.100`. On Linux, enter `localhost`  
 
 
 *Shutting Down*  
 
- 1. Return to your local machine's command prompt by pressing `ctrl-p` followed by `ctrl-q`
+ 1. Return to the Docker terminal.
 
  2. Type: `docker ps -a`  
     to see a list of all local docker containers. Note the name it gives as a label. It often is something like: `silly_tonsils`
