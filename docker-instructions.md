@@ -10,8 +10,6 @@
  3. Make a local copy of arogi-demos. Type:  
     `git clone https://github.com/arogi/arogi-demos.git`
 
-    *Windows Users* You may need to make sure that your files are formatted such that there are no carriage return/line fault statements in the necessary code. In particular please make sure that the interface files do not have these as this will cause Apache to fail. To ensure you do not have this problem please download [notepad++](https://notepad-plus-plus.org/download), launch the program, and open both the mclp_interface.py and pmedian_interface.py files located in the arogi-demos/interface directory.  For each file click the edit menu and then EOL Conversion and select Unix/OSX Format and save your changes.
-
 
 *Getting Started*
 
