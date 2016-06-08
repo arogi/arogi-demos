@@ -10,15 +10,13 @@
  3. Make a local copy of arogi-demos. Type:  
     `git clone https://github.com/arogi/arogi-demos.git`
 
-    *Windows Users* You may need to make sure that your files are formatted such that there are no carriage return/line fault statements in the necessary code. In particular please make sure that the interface files do not have these as this will cause Apache to fail. To ensure you do not have this problem please download [notepad++](https://notepad-plus-plus.org/download), launch the program, and open both the mclp_interface.py and pmedian_interface.py files located in the arogi-demos/interface directory.  For each file click the edit menu and then EOL Conversion and select Unix/OSX Format and save your changes.
-
 
 *Getting Started*
 
- 1. Type: `docker pull arogi/circuit-web`  
+ 1. Type: `docker pull arogi/arogi-demos`  
     to grab the latest Arogi Docker image.
 
- 2. Type: `docker run -it -p 80:80 -d -v ~/repos/arogi-demos/:/var/www/html arogi/circuit-web`  
+ 2. Type: `docker run -it -p 80:80 -d -v ~/repos/arogi-demos/:/var/www/html arogi/arogi-demos`  
     In that statement, replace `~/repos/arogi-demos/` with the pathname to your local repository.
 
  3. Open a web browser and enter the following into the address bar:  
