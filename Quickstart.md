@@ -21,3 +21,9 @@
 
  3. Open a web browser and enter the following into the address bar:  
      On OS X and Windows, enter `192.168.99.100`. On Linux, enter `localhost`  
+
+Screenshots:  
+MCLP
+![Screenshot](MCLP.png)  
+P-Median  
+![Screenshot](pMedian.png)  
