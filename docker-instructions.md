@@ -13,10 +13,10 @@
 
 *Getting Started*
 
- 1. Type: `docker pull arogi/arogi-demos`  
+ 1. Type: `docker pull arogi/docker-arogi-demos`  
     to grab the latest Arogi Docker image.
 
- 2. Type: `docker run -it -p 80:80 -d -v ~/repos/arogi-demos/:/var/www/html arogi/arogi-demos`  
+ 2. Type: `docker run -it -p 80:80 -d -v ~/repos/arogi-demos/:/var/www/html arogi/docker-arogi-demos`  
     In that statement, replace `~/repos/arogi-demos/` with the pathname to your local repository.
 
  3. Open a web browser and enter the following into the address bar:  
