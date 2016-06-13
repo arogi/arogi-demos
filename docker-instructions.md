@@ -3,7 +3,7 @@
 
 *Prerequisites*  
 
- 1. These instructions allow you to use Docker to run several Arogi demos with your own input GeoJSON point data. Take note of the directory location and file name of your data, those will be necessary later.
+ 1. These instructions allow you to use Docker to run several Arogi demos with your own input GeoJSON point data. Take note of the directory location and file name of your data, those will be necessary later. A [Quickstart guide](Quickstart.md) using sample data is also available.
 
  2. Install Docker. Their webpage has [instructions](https://docs.docker.com/engine/installation/).
 
