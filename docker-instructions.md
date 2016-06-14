@@ -3,13 +3,14 @@
 
 *Prerequisites*  
 
-(Note: These instructions do not yet fully describe how to load your own data -- the supporting JavaScript still has to be written. Nevertheless, these instructions provide a good hint on how to you could proceed).
-
- 1. These instructions allow you to use Docker to run several Arogi demos with your own input GeoJSON point data. Take note of the directory location of your data, and rename your GeoJSON file to *customdata.geojson*. Also, a [Quickstart guide](Quickstart.md) using sample data is also available.
+ 1. These instructions allow you to use Docker to run several Arogi demos with your own input GeoJSON point data.
 
  2. Install Docker. Their webpage has [instructions](https://docs.docker.com/engine/installation/).
 
  3. In Windows and OS X, launch the Docker Quickstart Terminal. Linux uses the standard Terminal.
+ 
+ 4. Type: `git clone https://github.com/arogi/arogi-demos.git`  
+    to make a local copy of the arogi-demos. Note the location of the created directory.
 
 *Getting Started*
 
@@ -17,8 +18,8 @@
     to grab the latest Arogi Docker image.
 
  2. Type: `docker run -it -p 80:80 -d -v ~/repos/arogi-demos/:/var/www/html arogi/docker-arogi-demos /bin/bash`  
-    In that statement, replace `~/repos/arogi-demos/` with the pathname to the local directory with your data.
-    The code looks for a file called *customdata.geojson*. Alternatively, the files are referenced in index.html. You can change the code there to customize what data are loaded.
+    In that statement, replace `~/repos/arogi-demos/` with the pathname to the local directory of the cloned repository.
+    Data used are in the /data directory. The index.html file (lines 86/87) must be modified to reference the name of your data file.
 
  3. Type: `docker ps -a`  
     to see a list of all local docker containers. Note the name it gives as a label. For the remainder of these instructions, this label will be referred to as `container_name`. The label often is something like: `silly_tonsils`
