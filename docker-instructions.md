@@ -3,6 +3,8 @@
 
 *Prerequisites*  
 
+(Note: These instructions do not yet fully describe how to load your own data -- the supporting JavaScript still has to be written. Nevertheless, these instructions provide a good hint on how to you could proceed).
+
  1. These instructions allow you to use Docker to run several Arogi demos with your own input GeoJSON point data. Take note of the directory location of your data, and rename your GeoJSON file to *customdata.geojson*. Also, a [Quickstart guide](Quickstart.md) using sample data is also available.
 
  2. Install Docker. Their webpage has [instructions](https://docs.docker.com/engine/installation/).
