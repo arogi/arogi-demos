@@ -14,10 +14,10 @@
 
 *Getting Started*
 
- 1. Type: `docker pull arogi/docker-arogi-demos`  
+ 1. Type: `docker pull arogi/docker-dependencies`  
     to grab the latest Arogi Docker image.
 
- 2. Type: `docker run -it -p 80:80 -d -v ~/repos/arogi-demos/:/var/www/html arogi/docker-arogi-demos /bin/bash`  
+ 2. Type: `docker run -it -p 80:80 -d -v ~/repos/arogi-demos/:/var/www/html arogi/docker-dependencies /bin/bash`  
     In that statement, replace `~/repos/arogi-demos/` with the pathname to the local directory of the cloned repository.
     Data used are in the /data directory. The index.html file (lines 86/87) must be modified to reference the name of your data file.
 
@@ -40,4 +40,4 @@
 
  3. To remove the container, type: `docker rm container_name`
 
- 4. To remove the image, type: `docker rmi image_name` (e.g., `docker rmi arogi/docker-arogi-demos`)
+ 4. To remove the image, type: `docker rmi image_name` (e.g., `docker rmi arogi/docker-dependencies`)
