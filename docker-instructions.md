@@ -33,11 +33,8 @@
 
  1. Return to the Docker terminal.
 
- 2. Type: `docker ps -a`  
-    to see a list of all local docker containers. Note the name it gives as a label. It often is something like: `silly_tonsils`
+ 2. To stop Docker, type: `docker stop container_name`
 
- 3. To stop Docker, type: `docker stop container_name`
+ 3. To remove the container, type: `docker rm container_name`
 
- 4. To remove the container, type: `docker rm container_name`
-
- 5. To remove the image, type: `docker rmi image_name` (e.g., `docker rmi arogi/circuit-web`)
+ 4. To remove the image, type: `docker rmi image_name` (e.g., `docker rmi arogi/docker-arogi-demos`)
