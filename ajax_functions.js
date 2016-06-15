@@ -319,7 +319,7 @@ function pmedianAjaxTrigger(){
       });
 
       newAnswer = JSON.parse(answerText);
-      document.getElementById('solutionQuality').innerHTML = (Math.log10(newAnswer.properties.objective)).toFixed(3);
+      document.getElementById('solutionQuality').innerHTML = (newAnswer.properties.objective/1000000).toFixed(2);
 
       var inputArray = [];
       var uniquesArray = [];
