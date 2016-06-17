@@ -19,7 +19,7 @@
 
  2. Type: `docker run -it -p 80:80 -d -v ~/repos/arogi-demos/:/var/www/html arogi/docker-dependencies /bin/bash`  
     In that statement, replace `~/repos/arogi-demos/` with the pathname to the local directory of the cloned repository.
-    Data used are in the /data directory. The index.html file (lines 86/87) must be modified to reference the name of your data file.
+    Data used are in the /data directory. To change data files, modify the path in index.html, lines 86/87.
 
  3. Type: `docker ps -a`  
     to see a list of all local docker containers. Note the name it gives as a label. For the remainder of these instructions, this label will be referred to as `container_name`. The label often is something like: `silly_tonsils`
