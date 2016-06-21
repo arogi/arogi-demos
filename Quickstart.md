@@ -9,10 +9,10 @@
 
 *Getting Started*
 
- 1. Type: `docker pull arogi/temp-arogi-demos`  
+ 1. Type: `docker pull arogi/docker-arogi-demos`  
     to grab the latest Arogi Docker image.
 
- 2. Type: `docker run -it -p 80:80 arogi/temp-arogi-demos`
+ 2. Type: `docker run -it -p 80:80 arogi/docker-arogi-demos`
 
  3. Open a web browser and enter the following into the address bar:  
      On OS X and Windows, enter `192.168.99.100`. On Linux, enter `localhost`  
